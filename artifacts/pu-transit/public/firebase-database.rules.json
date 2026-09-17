@@ -1,0 +1,516 @@
+{
+  "rules": {
+    ".read": false,
+    "memberships": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$uid": {
+        ".read": "auth != null && auth.token.email_verified == true && auth.uid == $uid && (!data.exists() || data.child('uid').val() == $uid)",
+        ".write": "auth != null && auth.token.email_verified == true && newData.exists() && ((!data.exists() && auth.uid == $uid && newData.child('uid').val() == auth.uid && newData.child('email').val() == auth.token.email && (newData.child('role').val() == 'student' || newData.child('role').val() == 'staff') && newData.child('status').val() == 'approved' && newData.child('active').val() == true && newData.child('assignedBusId').val() == '' && !newData.child('expiresAt').exists() && newData.child('createdAt').val() >= now - 300000 && newData.child('createdAt').val() <= now + 300000) || (data.exists() && auth.uid == $uid && data.child('uid').val() == $uid && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && newData.child('email').val() == auth.token.email && newData.child('uid').val() == data.child('uid').val() && newData.child('role').val() == data.child('role').val() && newData.child('status').val() == data.child('status').val() && newData.child('active').val() == data.child('active').val() && newData.child('assignedBusId').val() == data.child('assignedBusId').val() && newData.child('requestedRole').val() == data.child('requestedRole').val() && newData.child('createdAt').val() == data.child('createdAt').val() && newData.child('expiresAt').val() == data.child('expiresAt').val()) || (data.exists() && auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && newData.child('uid').val() == data.child('uid').val() && newData.child('email').val() == data.child('email').val() && newData.child('createdAt').val() == data.child('createdAt').val() && (auth.uid != $uid || (newData.child('role').val() == 'admin' && newData.child('status').val() == 'approved' && newData.child('active').val() == true && (!newData.child('expiresAt').exists() || newData.child('expiresAt').val() > now) && ($uid != 'hqKU3amnTzVBT3yF3p4DMRnirDq1' || !newData.child('expiresAt').exists()))) && ($uid != 'hqKU3amnTzVBT3yF3p4DMRnirDq1' || auth.uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')))",
+        ".validate": "newData.exists() && newData.hasChildren(['uid', 'email', 'role', 'status', 'active', 'assignedBusId', 'createdAt', 'updatedAt']) && newData.child('uid').isString() && newData.child('uid').val() == $uid && newData.child('email').isString() && newData.child('role').isString() && (newData.child('role').val() == 'student' || newData.child('role').val() == 'staff' || newData.child('role').val() == 'driver' || newData.child('role').val() == 'admin') && newData.child('status').isString() && (newData.child('status').val() == 'pending' || newData.child('status').val() == 'approved' || newData.child('status').val() == 'rejected' || newData.child('status').val() == 'suspended') && newData.child('active').isBoolean() && (newData.child('status').val() == 'approved' || newData.child('active').val() == false) && newData.child('assignedBusId').isString() && ((newData.child('role').val() != 'driver' && (newData.child('assignedBusId').val() == '' || (newData.child('role').val() == 'admin' && $uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1'))) || (newData.child('role').val() == 'driver' && (newData.child('active').val() == false || newData.child('assignedBusId').val().length > 0))) && newData.child('createdAt').isNumber() && newData.child('updatedAt').isNumber() && (!newData.child('requestedRole').exists() || (newData.child('requestedRole').isString() && (newData.child('requestedRole').val() == 'driver' || newData.child('requestedRole').val() == 'admin'))) && (newData.child('email').val().matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (newData.child('role').val() == 'student' && !newData.child('requestedRole').exists()))",
+        "uid": {
+          ".validate": true
+        },
+        "email": {
+          ".validate": true
+        },
+        "role": {
+          ".validate": "!newData.parent().child('requestedRole').exists() || newData.val() == 'student'"
+        },
+        "status": {
+          ".validate": true
+        },
+        "active": {
+          ".validate": true
+        },
+        "assignedBusId": {
+          ".validate": "newData.val() == '' || (newData.val().matches(/^[A-Z0-9]{2,20}$/) && root.child('buses').child(newData.val()).exists() && (data.val() == newData.val() || root.child('buses').child(newData.val()).child('status').val() == 'active'))"
+        },
+        "createdAt": {
+          ".validate": true
+        },
+        "updatedAt": {
+          ".validate": true
+        },
+        "requestedRole": {
+          ".validate": "!newData.exists() || newData.parent().child('role').val() == 'student'"
+        },
+        "expiresAt": {
+          ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() % 1 == 0 && newData.val() <= 8640000000000000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "routes": {
+      ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$routeId": {
+        ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && (newData.exists() || data.child('status').val() == 'draft')",
+        ".validate": "newData.exists() && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && newData.hasChildren(['id', 'shift', 'busNumber', 'origin', 'destination']) && newData.child('id').isString() && newData.child('id').val() == $routeId && newData.child('shift').isString() && newData.child('shift').val().length > 0 && newData.child('shift').val().length <= 256 && newData.child('busNumber').isString() && newData.child('busNumber').val().length > 0 && newData.child('busNumber').val().length <= 256 && newData.child('origin').isString() && newData.child('origin').val().length > 0 && newData.child('origin').val().length <= 256 && newData.child('destination').isString() && newData.child('destination').val().length > 0 && newData.child('destination').val().length <= 256 && (!newData.child('stops').exists() || newData.child('stops').hasChildren()) && (!newData.child('pathData').exists() || newData.child('pathData').hasChildren()) && newData.child('status').isString() && (newData.child('status').val() == 'draft' || newData.child('status').val() == 'published' || newData.child('status').val() == 'archived') && (!newData.child('pathSource').exists() || newData.child('pathSource').val() == 'ors' || newData.child('pathSource').val() == 'manual') && (newData.child('status').val() != 'published' || newData.child('pathSource').val() == 'manual' || (newData.child('pathSource').val() == 'ors' && newData.child('pathData').hasChildren())) && (!data.exists() || data.child('status').val() == 'draft' || newData.child('status').val() != 'draft') && (!data.child('publishedVersion').exists() || newData.child('publishedVersion').exists())",
+        "id": {
+          ".validate": true
+        },
+        "shift": {
+          ".validate": true
+        },
+        "busNumber": {
+          ".validate": "newData.val().matches(/^[A-Z0-9]{2,20}$/) && root.child('buses').child(newData.val()).exists()"
+        },
+        "origin": {
+          ".validate": true
+        },
+        "destination": {
+          ".validate": true
+        },
+        "stops": {
+          "$stopIndex": {
+            ".validate": "$stopIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && (!newData.child('name').exists() || (newData.child('name').isString() && newData.child('name').val().length <= 256))",
+            "lat": {
+              ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+            },
+            "lng": {
+              ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 256"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "pathData": {
+          "$pathIndex": {
+            ".validate": "$pathIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180",
+            "lat": {
+              ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+            },
+            "lng": {
+              ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "kind": {
+          ".validate": "newData.isString() && (newData.val() == 'bus' || newData.val() == 'shuttle')"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() == 'draft' || newData.val() == 'published' || newData.val() == 'archived')"
+        },
+        "pathSource": {
+          ".validate": "newData.isString() && (newData.val() == 'ors' || newData.val() == 'manual')"
+        },
+        "publishedVersion": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 == 0 && (!data.exists() || newData.val() >= data.val())"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "audit": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      ".indexOn": [
+        "at"
+      ],
+      "$id": {
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['at', 'actorUid', 'actorEmail', 'action', 'target', 'summary']) && newData.child('at').isNumber() && newData.child('at').val() == now && newData.child('actorUid').isString() && newData.child('actorUid').val() == auth.uid && newData.child('actorEmail').isString() && newData.child('actorEmail').val() == auth.token.email && newData.child('action').isString() && (newData.child('action').val() == 'tracking.force_end' || newData.child('action').val() == 'tracking.handover' || newData.child('action').val() == 'membership.update' || newData.child('action').val() == 'route.save' || newData.child('action').val() == 'route.delete' || newData.child('action').val() == 'route.archive' || newData.child('action').val() == 'notice.save' || newData.child('action').val() == 'notice.delete' || newData.child('action').val() == 'bus.save' || newData.child('action').val() == 'bus.deactivate' || newData.child('action').val() == 'bus.reactivate' || newData.child('action').val() == 'assignment.save' || newData.child('action').val() == 'assignment.delete' || newData.child('action').val() == 'calendar.save' || newData.child('action').val() == 'calendar.delete') && newData.child('target').isString() && newData.child('target').val().length > 0 && newData.child('target').val().length <= 128 && newData.child('summary').isString() && newData.child('summary').val().length > 0 && newData.child('summary').val().length <= 300",
+        "at": {
+          ".validate": true
+        },
+        "actorUid": {
+          ".validate": true
+        },
+        "actorEmail": {
+          ".validate": true
+        },
+        "action": {
+          ".validate": true
+        },
+        "target": {
+          ".validate": true
+        },
+        "summary": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "tracking": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$busId": {
+        ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'driver' || (root.child('memberships').child(auth.uid).child('role').val() == 'admin' && auth.uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')) && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && newData.exists() && (((root.child('memberships').child(auth.uid).child('role').val() == 'driver' || (root.child('memberships').child(auth.uid).child('role').val() == 'admin' && auth.uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')) && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && (root.child('memberships').child(auth.uid).child('assignedBusId').val() == $busId || (newData.child('feed').child('assignmentId').isString() && root.child('assignments').child(auth.uid).child(newData.child('feed').child('assignmentId').val()).child('busId').val() == $busId && (((!data.exists() || (newData.child('feed').child('phase').val() == 'active' && newData.child('sequence').val() == 0 && newData.child('feed').child('generation').val() > data.child('feed').child('generation').val())) && root.child('assignments').child(auth.uid).child(newData.child('feed').child('assignmentId').val()).child('startsAt').val() <= now && now < root.child('assignments').child(auth.uid).child(newData.child('feed').child('assignmentId').val()).child('endsAt').val()) || (!(!data.exists() || (newData.child('feed').child('phase').val() == 'active' && newData.child('sequence').val() == 0 && newData.child('feed').child('generation').val() > data.child('feed').child('generation').val())) && data.child('feed').child('assignmentId').val() == newData.child('feed').child('assignmentId').val() && now < root.child('assignments').child(auth.uid).child(newData.child('feed').child('assignmentId').val()).child('endsAt').val() + 86400000)))) && newData.child('driverUid').val() == auth.uid) || (root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && data.exists() && data.child('feed').child('phase').val() == 'active' && newData.child('feed').child('phase').val() == 'ended' && newData.child('driverUid').val() == data.child('driverUid').val() && newData.child('publisherId').val() == data.child('publisherId').val() && newData.child('sequence').val() == data.child('sequence').val() && newData.child('feed').child('tripId').val() == data.child('feed').child('tripId').val() && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() && newData.child('feed').child('requestedAt').val() == data.child('feed').child('requestedAt').val() && newData.child('feed').child('startedAt').val() == data.child('feed').child('startedAt').val() && newData.child('feed').child('heartbeatAt').val() == data.child('feed').child('heartbeatAt').val() && newData.child('feed').child('protocolVersion').val() == data.child('feed').child('protocolVersion').val() && newData.child('feed').child('busId').val() == data.child('feed').child('busId').val() && newData.child('feed').child('gpsQuality').val() == 'unavailable' && !newData.child('feed').child('location').exists()))",
+        ".validate": "newData.exists() && $busId.length > 0 && newData.hasChildren(['driverUid', 'publisherId', 'sequence', 'feed']) && newData.child('driverUid').isString() && (newData.child('driverUid').val() == auth.uid || (data.exists() && newData.child('driverUid').val() == data.child('driverUid').val())) && newData.child('driverUid').val().length > 0 && newData.child('publisherId').isString() && newData.child('publisherId').val().matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && newData.child('sequence').isNumber() && newData.child('sequence').val() >= 0 && newData.child('sequence').val() % 1 == 0 && newData.child('feed').hasChildren(['protocolVersion', 'busId', 'tripId', 'generation', 'phase', 'requestedAt', 'startedAt', 'endedAt', 'heartbeatAt', 'gpsQuality', 'lastReportCapturedAt', 'lastReportReceivedAt', 'reportedAccuracy', 'lastValidCapturedAt', 'lastValidReceivedAt']) && newData.child('feed').child('protocolVersion').isNumber() && newData.child('feed').child('protocolVersion').val() == 2 && newData.child('feed').child('busId').isString() && newData.child('feed').child('busId').val() == $busId && newData.child('feed').child('tripId').isString() && newData.child('feed').child('tripId').val().matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && newData.child('feed').child('generation').isNumber() && newData.child('feed').child('generation').val() >= 1 && newData.child('feed').child('generation').val() % 1 == 0 && newData.child('feed').child('phase').isString() && (newData.child('feed').child('phase').val() == 'active' || newData.child('feed').child('phase').val() == 'ended') && newData.child('feed').child('requestedAt').isNumber() && newData.child('feed').child('requestedAt').val() >= 0 && newData.child('feed').child('requestedAt').val() % 1 == 0 && newData.child('feed').child('startedAt').isNumber() && newData.child('feed').child('startedAt').val() >= 0 && newData.child('feed').child('startedAt').val() % 1 == 0 && newData.child('feed').child('endedAt').isNumber() && (newData.child('feed').child('endedAt').val() == 0 || newData.child('feed').child('endedAt').val() >= 0) && newData.child('feed').child('heartbeatAt').isNumber() && newData.child('feed').child('heartbeatAt').val() >= 0 && newData.child('feed').child('heartbeatAt').val() % 1 == 0 && newData.child('feed').child('gpsQuality').isString() && (newData.child('feed').child('gpsQuality').val() == 'acquiring' || newData.child('feed').child('gpsQuality').val() == 'good' || newData.child('feed').child('gpsQuality').val() == 'weak' || newData.child('feed').child('gpsQuality').val() == 'unavailable') && newData.child('feed').child('lastReportCapturedAt').isNumber() && newData.child('feed').child('lastReportCapturedAt').val() >= 0 && newData.child('feed').child('lastReportCapturedAt').val() % 1 == 0 && newData.child('feed').child('lastReportReceivedAt').isNumber() && newData.child('feed').child('lastReportReceivedAt').val() >= 0 && newData.child('feed').child('lastReportReceivedAt').val() % 1 == 0 && newData.child('feed').child('reportedAccuracy').isNumber() && newData.child('feed').child('reportedAccuracy').val() >= 0 && newData.child('feed').child('reportedAccuracy').val() <= 1000000 && newData.child('feed').child('lastValidCapturedAt').isNumber() && newData.child('feed').child('lastValidCapturedAt').val() >= 0 && newData.child('feed').child('lastValidCapturedAt').val() % 1 == 0 && newData.child('feed').child('lastValidReceivedAt').isNumber() && newData.child('feed').child('lastValidReceivedAt').val() >= 0 && newData.child('feed').child('lastValidReceivedAt').val() % 1 == 0 && ((!newData.child('feed').child('location').exists()) || (newData.child('feed').child('location').hasChildren(['lat', 'lng', 'accuracy']) && newData.child('feed').child('location').child('lat').isNumber() && newData.child('feed').child('location').child('lat').val() >= -90 && newData.child('feed').child('location').child('lat').val() <= 90 && newData.child('feed').child('location').child('lng').isNumber() && newData.child('feed').child('location').child('lng').val() >= -180 && newData.child('feed').child('location').child('lng').val() <= 180 && newData.child('feed').child('location').child('accuracy').isNumber() && newData.child('feed').child('location').child('accuracy').val() >= 0 && newData.child('feed').child('location').child('accuracy').val() <= 100)) && (((!data.exists() || data.child('feed').child('phase').val() == 'ended' || (data.child('feed').child('phase').val() == 'active' && data.child('feed').child('heartbeatAt').val() < now - 90000)) && newData.child('feed').child('phase').val() == 'active' && newData.child('sequence').val() == 0 && root.child('buses').child($busId).child('status').val() == 'active' && newData.child('feed').child('startedAt').val() == now && newData.child('feed').child('heartbeatAt').val() == now && newData.child('feed').child('endedAt').val() == 0 && newData.child('feed').child('gpsQuality').val() == 'acquiring' && newData.child('feed').child('lastReportCapturedAt').val() == 0 && newData.child('feed').child('lastReportReceivedAt').val() == 0 && newData.child('feed').child('reportedAccuracy').val() == 0 && newData.child('feed').child('lastValidCapturedAt').val() == 0 && newData.child('feed').child('lastValidReceivedAt').val() == 0 && !newData.child('feed').child('location').exists() && ((!data.exists() && newData.child('feed').child('generation').val() == 1 && newData.child('feed').child('requestedAt').val() >= now - 30000 && newData.child('feed').child('requestedAt').val() <= now + 5000) || (data.exists() && data.child('feed').child('phase').val() == 'ended' && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() + 1 && newData.child('feed').child('requestedAt').val() >= now - 30000 && newData.child('feed').child('requestedAt').val() <= now + 5000) || (data.exists() && data.child('feed').child('phase').val() == 'active' && data.child('feed').child('heartbeatAt').val() < now - 90000 && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() + 1 && newData.child('feed').child('requestedAt').val() >= now - 30000 && newData.child('feed').child('requestedAt').val() <= now + 5000))) || (newData.child('feed').child('phase').val() == 'ended' && newData.child('sequence').val() == 0 && newData.child('feed').child('startedAt').val() == now && newData.child('feed').child('endedAt').val() == now && newData.child('feed').child('heartbeatAt').val() == now && newData.child('feed').child('gpsQuality').val() == 'unavailable' && newData.child('feed').child('lastReportCapturedAt').val() == 0 && newData.child('feed').child('lastReportReceivedAt').val() == 0 && newData.child('feed').child('reportedAccuracy').val() == 0 && newData.child('feed').child('lastValidCapturedAt').val() == 0 && newData.child('feed').child('lastValidReceivedAt').val() == 0 && !newData.child('feed').child('location').exists() && ((!data.exists() && newData.child('feed').child('generation').val() == 1) || (data.exists() && data.child('feed').child('phase').val() == 'ended' && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() + 1) || (data.exists() && data.child('feed').child('phase').val() == 'active' && data.child('feed').child('heartbeatAt').val() < now - 90000 && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() + 1))) || (data.exists() && data.child('feed').child('phase').val() == 'active' && newData.child('driverUid').val() == data.child('driverUid').val() && newData.child('publisherId').val() == data.child('publisherId').val() && newData.child('feed').child('protocolVersion').val() == data.child('feed').child('protocolVersion').val() && newData.child('feed').child('busId').val() == data.child('feed').child('busId').val() && newData.child('feed').child('tripId').val() == data.child('feed').child('tripId').val() && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() && newData.child('feed').child('requestedAt').val() == data.child('feed').child('requestedAt').val() && newData.child('feed').child('startedAt').val() == data.child('feed').child('startedAt').val() && ((newData.child('feed').child('phase').val() == 'active' && newData.child('feed').child('endedAt').val() == 0) || (newData.child('feed').child('phase').val() == 'ended' && newData.child('feed').child('endedAt').val() == now)) && (newData.child('sequence').val() > data.child('sequence').val() || (newData.child('feed').child('phase').val() == 'ended' && newData.child('sequence').val() == data.child('sequence').val())) && (((newData.child('feed').child('phase').val() == 'active' && newData.child('feed').child('heartbeatAt').val() == now && newData.child('feed').child('lastReportReceivedAt').val() == now && newData.child('feed').child('lastReportCapturedAt').val() > data.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastReportCapturedAt').val() >= now - 30000 && newData.child('feed').child('lastReportCapturedAt').val() <= now + 5000 && newData.child('feed').child('reportedAccuracy').val() >= 0 && newData.child('feed').child('reportedAccuracy').val() <= 100 && newData.child('feed').child('gpsQuality').val() == 'good' && newData.child('feed').child('location').exists() && newData.child('feed').child('location').child('accuracy').val() == newData.child('feed').child('reportedAccuracy').val() && newData.child('feed').child('lastValidCapturedAt').val() == newData.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastValidReceivedAt').val() == now) || (newData.child('feed').child('phase').val() == 'active' && newData.child('feed').child('heartbeatAt').val() == now && newData.child('feed').child('lastReportReceivedAt').val() == now && newData.child('feed').child('lastReportCapturedAt').val() > data.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastReportCapturedAt').val() >= now - 30000 && newData.child('feed').child('lastReportCapturedAt').val() <= now + 5000 && newData.child('feed').child('reportedAccuracy').val() > 100 && newData.child('feed').child('gpsQuality').val() == 'weak' && newData.child('feed').child('lastValidCapturedAt').val() == data.child('feed').child('lastValidCapturedAt').val() && newData.child('feed').child('lastValidReceivedAt').val() == data.child('feed').child('lastValidReceivedAt').val() && ((!data.child('feed').child('location').exists() && !newData.child('feed').child('location').exists()) || (data.child('feed').child('location').exists() && newData.child('feed').child('location').exists() && newData.child('feed').child('location').child('lat').val() == data.child('feed').child('location').child('lat').val() && newData.child('feed').child('location').child('lng').val() == data.child('feed').child('location').child('lng').val() && newData.child('feed').child('location').child('accuracy').val() == data.child('feed').child('location').child('accuracy').val()))) || (newData.child('feed').child('phase').val() == 'active' && newData.child('feed').child('heartbeatAt').val() == now && newData.child('feed').child('lastReportCapturedAt').val() == data.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastReportReceivedAt').val() == data.child('feed').child('lastReportReceivedAt').val() && newData.child('feed').child('reportedAccuracy').val() == data.child('feed').child('reportedAccuracy').val() && newData.child('feed').child('lastValidCapturedAt').val() == data.child('feed').child('lastValidCapturedAt').val() && newData.child('feed').child('lastValidReceivedAt').val() == data.child('feed').child('lastValidReceivedAt').val() && (newData.child('feed').child('gpsQuality').val() == data.child('feed').child('gpsQuality').val() || newData.child('feed').child('gpsQuality').val() == 'unavailable') && ((!data.child('feed').child('location').exists() && !newData.child('feed').child('location').exists()) || (data.child('feed').child('location').exists() && newData.child('feed').child('location').exists() && newData.child('feed').child('location').child('lat').val() == data.child('feed').child('location').child('lat').val() && newData.child('feed').child('location').child('lng').val() == data.child('feed').child('location').child('lng').val() && newData.child('feed').child('location').child('accuracy').val() == data.child('feed').child('location').child('accuracy').val())) || (newData.child('feed').child('phase').val() == 'ended' && newData.child('sequence').val() == data.child('sequence').val() && newData.child('feed').child('endedAt').val() == now && newData.child('feed').child('heartbeatAt').val() == data.child('feed').child('heartbeatAt').val() && newData.child('feed').child('gpsQuality').val() == 'unavailable' && newData.child('feed').child('lastReportCapturedAt').val() == data.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastReportReceivedAt').val() == data.child('feed').child('lastReportReceivedAt').val() && newData.child('feed').child('reportedAccuracy').val() == data.child('feed').child('reportedAccuracy').val() && newData.child('feed').child('lastValidCapturedAt').val() == data.child('feed').child('lastValidCapturedAt').val() && newData.child('feed').child('lastValidReceivedAt').val() == data.child('feed').child('lastValidReceivedAt').val() && !newData.child('feed').child('location').exists())))) || (data.exists() && data.child('feed').child('phase').val() == 'active' && newData.child('feed').child('phase').val() == 'active' && newData.child('driverUid').val() == data.child('driverUid').val() && newData.child('publisherId').val() == data.child('publisherId').val() && newData.child('sequence').val() == data.child('sequence').val() && newData.child('feed').child('protocolVersion').val() == data.child('feed').child('protocolVersion').val() && newData.child('feed').child('busId').val() == data.child('feed').child('busId').val() && newData.child('feed').child('tripId').val() == data.child('feed').child('tripId').val() && newData.child('feed').child('generation').val() == data.child('feed').child('generation').val() && newData.child('feed').child('requestedAt').val() == data.child('feed').child('requestedAt').val() && newData.child('feed').child('startedAt').val() == data.child('feed').child('startedAt').val() && newData.child('feed').child('endedAt').val() == data.child('feed').child('endedAt').val() && newData.child('feed').child('heartbeatAt').val() == data.child('feed').child('heartbeatAt').val() && newData.child('feed').child('gpsQuality').val() == data.child('feed').child('gpsQuality').val() && newData.child('feed').child('lastReportCapturedAt').val() == data.child('feed').child('lastReportCapturedAt').val() && newData.child('feed').child('lastReportReceivedAt').val() == data.child('feed').child('lastReportReceivedAt').val() && newData.child('feed').child('reportedAccuracy').val() == data.child('feed').child('reportedAccuracy').val() && newData.child('feed').child('lastValidCapturedAt').val() == data.child('feed').child('lastValidCapturedAt').val() && newData.child('feed').child('lastValidReceivedAt').val() == data.child('feed').child('lastValidReceivedAt').val() && ((!data.child('feed').child('location').exists() && !newData.child('feed').child('location').exists()) || (data.child('feed').child('location').exists() && newData.child('feed').child('location').exists() && newData.child('feed').child('location').child('lat').val() == data.child('feed').child('location').child('lat').val() && newData.child('feed').child('location').child('lng').val() == data.child('feed').child('location').child('lng').val() && newData.child('feed').child('location').child('accuracy').val() == data.child('feed').child('location').child('accuracy').val())))))",
+        "driverUid": {
+          ".validate": true
+        },
+        "publisherId": {
+          ".validate": true
+        },
+        "sequence": {
+          ".validate": true
+        },
+        "feed": {
+          ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+          "protocolVersion": {
+            ".validate": true
+          },
+          "busId": {
+            ".validate": true
+          },
+          "tripId": {
+            ".validate": true
+          },
+          "generation": {
+            ".validate": true
+          },
+          "phase": {
+            ".validate": true
+          },
+          "requestedAt": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && (newData.parent().child('phase').val() != 'active' || (data.parent().exists() && data.parent().child('phase').val() == 'active' && newData.parent().child('generation').val() == data.parent().child('generation').val()) || (newData.val() >= now - 30000 && newData.val() <= now + 5000))"
+          },
+          "startedAt": {
+            ".validate": true
+          },
+          "endedAt": {
+            ".validate": true
+          },
+          "heartbeatAt": {
+            ".validate": "newData.isNumber() && (newData.parent().child('phase').val() != 'active' || newData.parent().child('gpsQuality').val() != 'unavailable' || (newData.parent().child('lastReportCapturedAt').val() == data.parent().child('lastReportCapturedAt').val() && newData.parent().child('lastReportReceivedAt').val() == data.parent().child('lastReportReceivedAt').val() && newData.parent().child('reportedAccuracy').val() == data.parent().child('reportedAccuracy').val() && newData.parent().child('lastValidCapturedAt').val() == data.parent().child('lastValidCapturedAt').val() && newData.parent().child('lastValidReceivedAt').val() == data.parent().child('lastValidReceivedAt').val() && ((!newData.parent().child('location').exists() && !data.parent().child('location').exists()) || (newData.parent().child('location').exists() && data.parent().child('location').exists() && newData.parent().child('location').child('lat').val() == data.parent().child('location').child('lat').val() && newData.parent().child('location').child('lng').val() == data.parent().child('location').child('lng').val() && newData.parent().child('location').child('accuracy').val() == data.parent().child('location').child('accuracy').val()))))"
+          },
+          "gpsQuality": {
+            ".validate": true
+          },
+          "lastReportCapturedAt": {
+            ".validate": true
+          },
+          "lastReportReceivedAt": {
+            ".validate": true
+          },
+          "reportedAccuracy": {
+            ".validate": true
+          },
+          "lastValidCapturedAt": {
+            ".validate": true
+          },
+          "lastValidReceivedAt": {
+            ".validate": true
+          },
+          "location": {
+            "lat": {
+              ".validate": true
+            },
+            "lng": {
+              ".validate": true
+            },
+            "accuracy": {
+              ".validate": true
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "direction": {
+            ".validate": "newData.isString() && (newData.val() == 'toCampus' || newData.val() == 'fromCampus') && (!data.parent().exists() || (newData.parent().child('phase').val() == 'active' && newData.parent().parent().child('sequence').val() == 0 && newData.parent().child('generation').val() > data.parent().child('generation').val()) || (newData.parent().child('phase').val() == 'active' && newData.parent().parent().child('sequence').val() > data.parent().parent().child('sequence').val() && !data.exists()) || (data.exists() && newData.val() == data.val()))"
+          },
+          "full": {
+            ".validate": "newData.isBoolean()"
+          },
+          "routeVersions": {
+            "$routeId": {
+              ".validate": "$routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && newData.isNumber() && newData.val() >= 1 && newData.val() % 1 == 0 && (((!data.parent().parent().exists() || (newData.parent().parent().child('phase').val() == 'active' && newData.parent().parent().parent().child('sequence').val() == 0 && newData.parent().parent().child('generation').val() > data.parent().parent().child('generation').val())) && root.child('routes/' + $routeId).child('busNumber').val() == $busId && root.child('routes/' + $routeId).child('status').val() == 'published' && root.child('routes/' + $routeId).child('publishedVersion').val() == newData.val()) || (!(!data.parent().parent().exists() || (newData.parent().parent().child('phase').val() == 'active' && newData.parent().parent().parent().child('sequence').val() == 0 && newData.parent().parent().child('generation').val() > data.parent().parent().child('generation').val())) && data.exists() && newData.val() == data.val()))"
+            }
+          },
+          ".validate": "((newData.child('phase').val() == 'ended' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val()) && !newData.child('direction').exists()) || (!(newData.child('phase').val() == 'ended' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val())) && ((newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val())) || (!data.child('direction').exists()) || (data.child('direction').exists() && newData.child('direction').exists() && newData.child('direction').val() == data.child('direction').val())))) && ((newData.child('phase').val() == 'ended' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val()) && !newData.child('full').exists()) || (newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val()) && !newData.child('full').exists()) || (!(newData.child('phase').val() == 'ended' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val())) && !(newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() == 0 && (!data.exists() || newData.child('generation').val() > data.child('generation').val())) && ((!data.child('full').exists() && !newData.child('full').exists()) || (!data.child('full').exists() && newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() > data.parent().child('sequence').val() && newData.child('full').exists()) || (data.child('full').exists() && newData.child('full').exists() && ((newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() > data.parent().child('sequence').val()) || (newData.child('phase').val() == 'active' && newData.parent().child('sequence').val() == data.parent().child('sequence').val() && newData.child('full').val() == data.child('full').val()) || (newData.child('phase').val() == 'ended' && newData.parent().child('sequence').val() == data.parent().child('sequence').val() && newData.child('full').val() == data.child('full').val())))))) && (newData.parent().child('sequence').val() == 0 || !data.child('routeVersions').exists() || newData.child('routeVersions').exists())",
+          "assignmentId": {
+            ".validate": "newData.isString() && newData.val().matches(/^\\d{4}-\\d{2}-\\d{2}_[a-z0-9]{1,40}_[A-Z0-9]{2,20}$/) && ((!data.parent().parent().exists() || (newData.parent().child('phase').val() == 'active' && newData.parent().parent().child('sequence').val() == 0 && newData.parent().child('generation').val() > data.parent().child('generation').val())) || newData.val() == data.val())"
+          },
+          "$other": {
+            ".validate": false
+          }
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "notices": {
+      ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$noticeId": {
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && $noticeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && (!newData.exists() || !data.exists())",
+        ".validate": "newData.hasChildren(['id', 'text', 'routeId', 'until', 'createdBy', 'createdAt']) && newData.child('id').isString() && newData.child('id').val() == $noticeId && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 280 && newData.child('routeId').isString() && (newData.child('routeId').val() == '' || newData.child('routeId').val().matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/)) && newData.child('until').isNumber() && newData.child('until').val() > now && newData.child('until').val() <= now + 2592000000 && newData.child('createdBy').isString() && newData.child('createdBy').val() == auth.uid && newData.child('createdAt').isNumber() && newData.child('createdAt').val() == now",
+        "id": {
+          ".validate": true
+        },
+        "text": {
+          ".validate": true
+        },
+        "routeId": {
+          ".validate": true
+        },
+        "until": {
+          ".validate": true
+        },
+        "createdBy": {
+          ".validate": true
+        },
+        "createdAt": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "buses": {
+      ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$busId": {
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && $busId.matches(/^[A-Z0-9]{2,20}$/) && newData.exists()",
+        ".validate": "newData.hasChildren(['busId', 'label', 'status', 'reason', 'createdAt', 'updatedAt']) && newData.child('busId').isString() && newData.child('busId').val() == $busId && newData.child('label').isString() && newData.child('label').val().length > 0 && newData.child('label').val().length <= 64 && newData.child('status').isString() && (newData.child('status').val() == 'active' || newData.child('status').val() == 'out_of_service') && newData.child('reason').isString() && newData.child('reason').val().length <= 200 && (newData.child('status').val() == 'out_of_service' || newData.child('reason').val() == '') && newData.child('createdAt').isNumber() && (!data.exists() || newData.child('createdAt').val() == data.child('createdAt').val()) && newData.child('updatedAt').isNumber() && (data.child('status').val() != 'active' || newData.child('status').val() != 'out_of_service' || newData.parent().parent().child('tracking').child($busId).child('feed').child('phase').val() != 'active' || newData.parent().parent().child('tracking').child($busId).child('feed').child('heartbeatAt').val() <= 0 || newData.parent().parent().child('tracking').child($busId).child('feed').child('heartbeatAt').val() + 90000 < now)",
+        "busId": {
+          ".validate": true
+        },
+        "label": {
+          ".validate": true
+        },
+        "status": {
+          ".validate": true
+        },
+        "reason": {
+          ".validate": true
+        },
+        "createdAt": {
+          ".validate": true
+        },
+        "updatedAt": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "routeDrafts": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$routeId": {
+        ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+        ".validate": "newData.exists() && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && newData.hasChildren(['id', 'shift', 'busNumber', 'origin', 'destination']) && newData.child('id').isString() && newData.child('id').val() == $routeId && newData.child('shift').isString() && newData.child('shift').val().length > 0 && newData.child('shift').val().length <= 256 && newData.child('busNumber').isString() && newData.child('busNumber').val().length > 0 && newData.child('busNumber').val().length <= 256 && newData.child('origin').isString() && newData.child('origin').val().length > 0 && newData.child('origin').val().length <= 256 && newData.child('destination').isString() && newData.child('destination').val().length > 0 && newData.child('destination').val().length <= 256 && (!newData.child('stops').exists() || newData.child('stops').hasChildren()) && (!newData.child('pathData').exists() || newData.child('pathData').hasChildren()) && newData.child('status').isString() && (newData.child('status').val() == 'draft' || newData.child('status').val() == 'published') && (!newData.child('pathSource').exists() || newData.child('pathSource').val() == 'ors' || newData.child('pathSource').val() == 'manual') && (newData.child('status').val() != 'published' || newData.child('pathSource').val() == 'manual' || (newData.child('pathSource').val() == 'ors' && newData.child('pathData').hasChildren())) && newData.child('status').val() == 'draft'",
+        "id": {
+          ".validate": true
+        },
+        "shift": {
+          ".validate": true
+        },
+        "busNumber": {
+          ".validate": "newData.val().matches(/^[A-Z0-9]{2,20}$/) && root.child('buses').child(newData.val()).exists()"
+        },
+        "origin": {
+          ".validate": true
+        },
+        "destination": {
+          ".validate": true
+        },
+        "stops": {
+          "$stopIndex": {
+            ".validate": "$stopIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && (!newData.child('name').exists() || (newData.child('name').isString() && newData.child('name').val().length <= 256))",
+            "lat": {
+              ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+            },
+            "lng": {
+              ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+            },
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 256"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "pathData": {
+          "$pathIndex": {
+            ".validate": "$pathIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180",
+            "lat": {
+              ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+            },
+            "lng": {
+              ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        },
+        "kind": {
+          ".validate": "newData.isString() && (newData.val() == 'bus' || newData.val() == 'shuttle')"
+        },
+        "status": {
+          ".validate": "newData.isString() && (newData.val() == 'draft' || newData.val() == 'published')"
+        },
+        "pathSource": {
+          ".validate": "newData.isString() && (newData.val() == 'ors' || newData.val() == 'manual')"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "routeVersions": {
+      "$routeId": {
+        ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+        "$n": {
+          ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && $routeId.matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && !data.exists()",
+          ".validate": "$n.matches(/^[1-9][0-9]*$/) && newData.hasChildren(['n', 'shift', 'busNumber', 'origin', 'destination', 'createdAt', 'createdBy']) && newData.child('n').isNumber() && newData.child('n').val() >= 1 && newData.child('n').val() % 1 == 0 && newData.child('createdAt').isNumber() && newData.child('createdAt').val() == now && newData.child('createdBy').isString() && newData.child('createdBy').val() == auth.uid && newData.child('shift').isString() && newData.child('shift').val().length > 0 && newData.child('shift').val().length <= 256 && newData.child('busNumber').isString() && newData.child('busNumber').val().length > 0 && newData.child('busNumber').val().length <= 256 && newData.child('origin').isString() && newData.child('origin').val().length > 0 && newData.child('origin').val().length <= 256 && newData.child('destination').isString() && newData.child('destination').val().length > 0 && newData.child('destination').val().length <= 256 && (!newData.child('stops').exists() || newData.child('stops').hasChildren()) && (!newData.child('pathData').exists() || newData.child('pathData').hasChildren()) && (!newData.child('pathSource').exists() || newData.child('pathSource').val() == 'ors' || newData.child('pathSource').val() == 'manual')",
+          "n": {
+            ".validate": true
+          },
+          "shift": {
+            ".validate": true
+          },
+          "busNumber": {
+            ".validate": "newData.val().matches(/^[A-Z0-9]{2,20}$/) && root.child('buses').child(newData.val()).exists()"
+          },
+          "origin": {
+            ".validate": true
+          },
+          "destination": {
+            ".validate": true
+          },
+          "stops": {
+            "$stopIndex": {
+              ".validate": "$stopIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180 && (!newData.child('name').exists() || (newData.child('name').isString() && newData.child('name').val().length <= 256))",
+              "lat": {
+                ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+              },
+              "lng": {
+                ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length <= 256"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "pathData": {
+            "$pathIndex": {
+              ".validate": "$pathIndex.matches(/^(0|[1-9][0-9]*)$/) && newData.child('lat').isNumber() && newData.child('lat').val() >= -90 && newData.child('lat').val() <= 90 && newData.child('lng').isNumber() && newData.child('lng').val() >= -180 && newData.child('lng').val() <= 180",
+              "lat": {
+                ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+              },
+              "lng": {
+                ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "kind": {
+            ".validate": "newData.isString() && (newData.val() == 'bus' || newData.val() == 'shuttle')"
+          },
+          "pathSource": {
+            ".validate": "newData.isString() && (newData.val() == 'ors' || newData.val() == 'manual')"
+          },
+          "createdAt": {
+            ".validate": true
+          },
+          "createdBy": {
+            ".validate": true
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "assignments": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$uid": {
+        ".read": "(auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'driver' || (root.child('memberships').child(auth.uid).child('role').val() == 'admin' && auth.uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')) && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && auth.uid == $uid) || (auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now))",
+        "$assignmentId": {
+          ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && ($uid != 'hqKU3amnTzVBT3yF3p4DMRnirDq1' || auth.uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')",
+          ".validate": "$assignmentId.matches(/^\\d{4}-\\d{2}-\\d{2}_[a-z0-9]{1,40}_[A-Z0-9]{2,20}$/) && newData.hasChildren(['id', 'driverUid', 'driverEmail', 'busId', 'routeId', 'shift', 'serviceDate', 'startsAt', 'endsAt', 'createdAt', 'createdBy']) && newData.child('id').val() == $assignmentId && newData.child('driverUid').val() == $uid && (root.child('memberships').child($uid).child('role').val() == 'driver' || (root.child('memberships').child($uid).child('role').val() == 'admin' && $uid == 'hqKU3amnTzVBT3yF3p4DMRnirDq1')) && newData.child('driverEmail').val() == root.child('memberships').child($uid).child('email').val() && newData.child('busId').isString() && newData.child('busId').val().matches(/^[A-Z0-9]{2,20}$/) && root.child('buses').child(newData.child('busId').val()).exists() && $assignmentId.endsWith('_' + newData.child('busId').val()) && newData.child('routeId').isString() && newData.child('routeId').val().matches(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/) && root.child('routes').child(newData.child('routeId').val()).child('busNumber').val() == newData.child('busId').val() && root.child('routes').child(newData.child('routeId').val()).child('status').val() != 'draft' && root.child('routes').child(newData.child('routeId').val()).child('status').val() != 'archived' && newData.child('shift').isString() && newData.child('shift').val() == root.child('routes').child(newData.child('routeId').val()).child('shift').val() && newData.child('serviceDate').isString() && newData.child('serviceDate').val().matches(/^\\d{4}-\\d{2}-\\d{2}$/) && $assignmentId.beginsWith(newData.child('serviceDate').val() + '_') && newData.child('startsAt').isNumber() && newData.child('startsAt').val() % 86400000 == 66600000 && newData.child('endsAt').val() == newData.child('startsAt').val() + 86400000 && (!newData.child('routeVersion').exists() || (newData.child('routeVersion').isNumber() && newData.child('routeVersion').val() >= 1 && newData.child('routeVersion').val() % 1 == 0)) && newData.child('createdAt').isNumber() && newData.child('createdBy').val() == auth.uid",
+          "id": {
+            ".validate": true
+          },
+          "driverUid": {
+            ".validate": true
+          },
+          "driverEmail": {
+            ".validate": true
+          },
+          "busId": {
+            ".validate": true
+          },
+          "routeId": {
+            ".validate": true
+          },
+          "routeVersion": {
+            ".validate": true
+          },
+          "shift": {
+            ".validate": true
+          },
+          "serviceDate": {
+            ".validate": true
+          },
+          "startsAt": {
+            ".validate": true
+          },
+          "endsAt": {
+            ".validate": true
+          },
+          "createdAt": {
+            ".validate": true
+          },
+          "createdBy": {
+            ".validate": true
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "serviceCalendar": {
+      ".read": "auth != null && auth.token.email_verified == true && (auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) || (root.child('memberships').child(auth.uid).child('role').val() == 'student' && root.child('memberships').child(auth.uid).child('createdAt').val() + 2592000000 > now)) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && (root.child('memberships').child(auth.uid).child('role').val() == 'student' || root.child('memberships').child(auth.uid).child('role').val() == 'staff' || root.child('memberships').child(auth.uid).child('role').val() == 'driver' || root.child('memberships').child(auth.uid).child('role').val() == 'admin') && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      "$date": {
+        ".write": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now) && $date.matches(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/)",
+        ".validate": "newData.hasChildren(['date', 'noService', 'updatedBy', 'updatedAt']) && newData.child('date').isString() && newData.child('date').val() == $date && newData.child('noService').isBoolean() && newData.child('noService').val() == true && (!newData.child('note').exists() || (newData.child('note').isString() && newData.child('note').val().length > 0 && newData.child('note').val().length <= 140)) && newData.child('updatedBy').isString() && newData.child('updatedBy').val() == auth.uid && newData.child('updatedAt').isNumber() && newData.child('updatedAt').val() == now",
+        "date": {
+          ".validate": true
+        },
+        "noService": {
+          ".validate": true
+        },
+        "note": {
+          ".validate": true
+        },
+        "updatedBy": {
+          ".validate": true
+        },
+        "updatedAt": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "maintenance": {
+      ".read": "auth != null && auth.token.email_verified == true && auth.token.email.matches(/^[^@]+@paruluniversity\\.ac\\.in$/) && root.child('memberships').child(auth.uid).child('uid').val() == auth.uid && root.child('memberships').child(auth.uid).child('email').val() == auth.token.email && root.child('memberships').child(auth.uid).child('role').val() == 'admin' && root.child('memberships').child(auth.uid).child('status').val() == 'approved' && root.child('memberships').child(auth.uid).child('active').val() == true && (!root.child('memberships').child(auth.uid).child('expiresAt').exists() || root.child('memberships').child(auth.uid).child('expiresAt').val() > now)",
+      ".write": false
+    }
+  }
+}

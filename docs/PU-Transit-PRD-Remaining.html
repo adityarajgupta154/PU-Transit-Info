@@ -1,0 +1,1056 @@
+<!doctype html><html lang="hi-Latn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PU Transit — Remaining Work PRD v2.0</title><style>*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font:16px/1.6 "Work Sans",system-ui,sans-serif}main{max-width:1100px;margin:0 auto;padding:48px 32px 96px}h1{font-weight:200;font-size:56px;line-height:.95;letter-spacing:-.03em;margin:0 0 24px;text-transform:lowercase}h2{font-weight:200;font-size:36px;line-height:1;letter-spacing:-.02em;margin:56px 0 16px;text-transform:lowercase;border-top:2px solid #fff;padding-top:20px}h3{font-weight:400;font-size:22px;margin:36px 0 12px}p,li{max-width:80ch}a{color:#F5C400}code{background:#1a1a1a;padding:1px 5px;font-size:.9em}table{border-collapse:collapse;width:100%;margin:16px 0 28px;font-size:14px}th,td{border:1px solid rgba(255,255,255,.25);padding:8px 10px;vertical-align:top;text-align:left}th{background:#F5C400;color:#000;font-weight:500}tr:nth-child(even) td{background:#0d0d0d}strong{color:#F5C400;font-weight:500}input[type=checkbox]{accent-color:#F5C400}hr{border:0;border-top:1px solid rgba(255,255,255,.25)}@media print{body{background:#fff;color:#000}th{background:#eee;color:#000}strong{color:#000}a{color:#000}h2{border-color:#000}}</style></head><body><main><h1>PU Transit — Remaining Work PRD</h1>
+<p><strong>Version:</strong> 2.0 (companion to PRD v1.1; sirf baaki kaam)<br><strong>Last updated:</strong> 13 September 2026<br><strong>Status:</strong> Draft — for project-owner approval<br><strong>Owner / final approver:</strong> Project owner<br><strong>Audience:</strong> Project owner, implementation team, university transport administrators<br><strong>Decision enabled:</strong> PRD v1.1 mein jo maanga gaya tha aur abhi tak nahi bana, uska order, scope aur acceptance gates agree karna — agla code likhne se pehle.</p>
+<h2>1. Executive summary</h2>
+<p>Web product ban chuka hai aur reviewed hai: verified students/staff bus dhundh kar uski honest live/delayed/offline state dekhte hain, driver browser se trip share karta hai, admin routes / users / fleet / audit manage karta hai. PRD v1.1 §6 ke <strong>31 functional requirements mein 21 done, 7 partial, 1 not started, 2 deferred by decision</strong> hain (detail: <code>README.md</code> §3).</p>
+<p>Ye document <strong>sirf bache hue kaam</strong> ka PRD hai. Do gaps sabse bade hain:</p>
+<ol>
+<li><strong>Native background driver tracking (PRD Stage C)</strong> — bilkul shuru nahi hua. Browser tracking screen-on tak hi kaam karta hai; PRD v1.1 ka confirmed requirement (&quot;phone locked / app backgrounded hone par bhi&quot;) iske bina poora nahi ho sakta. Ye <strong>driver phone inventory</strong> par blocked hai — PRD guess karne se mana karta hai.</li>
+<li><strong>Operational readiness (Stages E–F)</strong> — retention cleanup, backups, rate limits, monitoring, runbooks, named owners, migration rehearsal, controlled validation. Inke bina &quot;university-wide daily use&quot; ka gate pass nahi hota, chahe features kitne bhi ban jaayein.</li>
+</ol>
+<p>Baaki gaps chhote aur clear hain: membership expiry, <code>buses</code> registry, route versions/publish/archive, dated assignments, &quot;no service&quot; state, admin MFA, W0-04&#39;s old-key revocation at ORS, aur ek <strong>owner action</strong> jo aaj bhi pending hai (bundled Rules publish).</p>
+<p>W0-04 has a local implementation whose automated/build verification passed (<a href="evidence/2026-09-13-w0-04-ors-proxy.md">evidence</a>). Server-secret/new-key comparison and live-provider check passed 13 Sep; old-key revocation at ORS is still pending (the old key was still accepted at the last check), so W0-04 is not complete. No published rollout claim is made.</p>
+<p>Sab kuch aath workstreams (W0–W7) mein grouped hai, har ek ke saath requirements, acceptance criteria, size (S/M/L) aur exit gate. <strong>This document is a proposal. It claims nothing as done, and it does not authorize destructive data migration, production rollout or store submission</strong> — same rule as v1.1.</p>
+<h2>2. Baseline — kya already bana hua hai (reference only)</h2>
+<p>Ye section sirf context ke liye hai; status ka source of truth <code>README.md</code> §2–§4 hai.</p>
+<ul>
+<li><strong>Identity:</strong> Firebase email/password auth, email verification, exact-domain allowlist (<code>paruluniversity.ac.in</code>), membership <code>pending / approved / rejected / suspended</code> + <code>active</code>; teen jagah enforce — RTDB Rules, API middleware, web gate. Legacy shared-password login retired.</li>
+<li><strong>Tracking contract (v1.1 §7):</strong> atomic <code>tracking/{busId}</code> node, single publisher, start / sample / heartbeat / end / force-end API, sample ~5 s, heartbeat 15 s, live ≤ 30 s aur ≤ 100 m, delayed 30–90 s, offline &gt; 90 s, pending-end durability, idempotent retries, <code>SESSION_CONFLICT</code> par phone idle.</li>
+<li><strong>Student:</strong> normalized search listing every match, text stop list, opt-in &quot;my location&quot;, text-first states.</li>
+<li><strong>Driver (web):</strong> preflight checklist, acquiring → live truthfully, battery guidance, wake lock; <strong>background tracking explicitly unsupported in the browser.</strong></li>
+<li><strong>Admin:</strong> users tab (approve/suspend/role/bus, conflict confirm before save), routes (geocoding, ORS routing, Vadodara bounds, search, lock during active trip, delete confirm), fleet with force-end + audit, System tab (audit log, Rules setup, legacy import preview).</li>
+<li><strong>Platform:</strong> Express API forwards verified user ID tokens to RTDB REST (no Admin SDK in request path), OpenAPI contract + generated clients, Rules emulator tests, web + API unit tests, OpenFreeMap basemap locked to Vadodara, &quot;Metro typographic tiles&quot; design system (<code>artifacts/pu-transit/DESIGN.md</code>).</li>
+</ul>
+<h2>3. Scope of this PRD</h2>
+<h3>In scope — har open item, uska source aur workstream</h3>
+<table>
+<thead>
+<tr>
+<th>Source (v1.1)</th>
+<th>Item</th>
+<th>State today</th>
+<th>Workstream</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Phase 3 close-out</td>
+<td>Bundled Rules publish (force-end + <code>audit</code> + <code>driverStatus</code> removal)</td>
+<td>Waiting on owner</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>Phase 2/3</td>
+<td>Live driver rehearsal against the live database</td>
+<td>Deferred by owner</td>
+<td>W0</td>
+</tr>
+<tr>
+<td>§10</td>
+<td>ORS geocoding/directions must stay behind the admin-only server proxy; key lifecycle must be completed</td>
+<td>Local automated/build verification passed; server-secret/new-key comparison and live-provider check passed 13 Sep; old-key revocation at ORS pending</td>
+<td>W0 / W5</td>
+</tr>
+<tr>
+<td>DRV-03, §8 gate, AUTH-06 (native)</td>
+<td>Native background tracking on the real device matrix</td>
+<td>Not started</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AUTH-02</td>
+<td>Membership expiry state</td>
+<td>Not modelled</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>§10</td>
+<td>Admin MFA / step-up</td>
+<td>Not started</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>AC-18, AC-32</td>
+<td>Revocation within 60 s; email-change re-verification flow</td>
+<td>Denied by Rules; UI timing/flow unverified</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>ADM-01, DRV-01</td>
+<td><code>buses</code> registry, uniqueness, deactivation, &quot;serviceable bus&quot;</td>
+<td>Not started (assignment picks from route bus numbers)</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>ADM-02</td>
+<td>Explicit map-click/manual routes can be saved without provider road geometry (dashed straight line)</td>
+<td>Partial</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>ADM-03</td>
+<td>Route versions + publish; active trip keeps its version</td>
+<td>Deferred; interim lock exists</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>ADM-04</td>
+<td>Archive; delete only unreferenced drafts</td>
+<td>Partial (lock + confirm exist)</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>ADM-05</td>
+<td>Service date / route version on assignments</td>
+<td>Partial (standing bus assignment + conflict confirm)</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>ADM-06</td>
+<td>Explicit handover as one action</td>
+<td>Two steps today (force-end, then Start)</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>§11 admin</td>
+<td>Unsaved-edit warning in the route editor</td>
+<td>Unverified</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>STU-04</td>
+<td>&quot;No service&quot; (holiday / no schedule) state</td>
+<td>No data source</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>STU-05</td>
+<td>Background-tab listener behaviour</td>
+<td>Unverified</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>STU-07</td>
+<td>Preferred bus/stop</td>
+<td>Deferred (evidence first)</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>§11, AC-24</td>
+<td>Screen-reader, 200 % zoom, 360 px audit</td>
+<td>Not done</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>§10</td>
+<td>Rate limits, body size limits, CORS allowlist, security headers</td>
+<td>Not implemented</td>
+<td>W5</td>
+</tr>
+<tr>
+<td>§10</td>
+<td>Retention cleanup job, backups, restore rehearsal</td>
+<td>Not implemented</td>
+<td>W5</td>
+</tr>
+<tr>
+<td>§10</td>
+<td>App Check (optional supplement)</td>
+<td>Not started</td>
+<td>W5</td>
+</tr>
+<tr>
+<td>§12</td>
+<td>Metrics, capacity model, field measurements</td>
+<td>Not instrumented</td>
+<td>W6</td>
+</tr>
+<tr>
+<td>§16</td>
+<td>Alerts, runbooks, named owners, help contact</td>
+<td>Not started</td>
+<td>W6</td>
+</tr>
+<tr>
+<td>§14, AC-27, AC-28</td>
+<td>Migration inventory, staging rehearsal, cutover plan, production-like auth check</td>
+<td>Preview/import only</td>
+<td>W7</td>
+</tr>
+<tr>
+<td>Stage F</td>
+<td>Controlled validation cohort, onboarding, phased expansion</td>
+<td>Not started</td>
+<td>W7</td>
+</tr>
+<tr>
+<td>§18</td>
+<td>Open decisions (inventory, owners, retention, scale, budgets, distribution, sign-off)</td>
+<td>Open</td>
+<td>§4 below</td>
+</tr>
+</tbody></table>
+<h3>Out of scope (unchanged from v1.1 §4)</h3>
+<p>Student native app jab tak responsive web student flow ke liye kaafi hai; AI predictions, payments, attendance, ticketing, driver scoring, multi-university SaaS; har GPS point ka historical replay; guaranteed ETA bina validated method ke; automatic emergency response; covert/off-duty tracking; force-stop / permission-denied / phone-off ke baad tracking ka promise; promo video / pitch deck as a prerequisite. <strong>Redesign phase closed hai:</strong> naye screens <code>DESIGN.md</code> follow karenge, lekin koi aur decorative UI work native tracking proof se pehle nahi hoga (v1.1 §15 rule).</p>
+<h2>4. Decisions required before implementation</h2>
+<p>Ye inputs code se nahi nikal sakte. Jahan &quot;none&quot; likha hai wahan guess karna allowed nahi hai.</p>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Blocks</th>
+<th>Who</th>
+<th>Default if undecided</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Driver phone inventory: models, OS versions, charging arrangement per bus</td>
+<td>W1 sizing, device matrix, distribution</td>
+<td>Transport owner</td>
+<td><strong>None.</strong> Android-only is not assumed; a spike on one loaner Android + one iOS device is allowed only as a feasibility check, not as the supported matrix</td>
+</tr>
+<tr>
+<td>Membership approval owner inside the university + roster/records source</td>
+<td>W2 (roster-assisted approval), W7 onboarding</td>
+<td>University / owner</td>
+<td>Manual admin approval continues as today</td>
+</tr>
+<tr>
+<td>Fleet scale: buses, simultaneous trips, daily users, peak concurrent viewers, operating hours</td>
+<td>W5 limits, W6 capacity model and budgets</td>
+<td>Transport owner</td>
+<td><strong>None</strong> for sign-off; interim engineering limits may be set conservatively and stated</td>
+</tr>
+<tr>
+<td>Retention and privacy policy + user-facing notices</td>
+<td>W5 cleanup job, W7 launch</td>
+<td>University / legal</td>
+<td>v1.1 §10 proposals as the draft (live sample residual ≤ 24 h, trip metadata ≤ 30 d, audit ≤ 90 d)</td>
+</tr>
+<tr>
+<td>Firebase billing plan (backups, higher limits), data region, provider budgets</td>
+<td>W5 backups, W6 alerts</td>
+<td>Owner</td>
+<td>Current plan; backups then need a scheduled export instead</td>
+</tr>
+<tr>
+<td>Native distribution ownership (Play Console / App Store or internal distribution)</td>
+<td>W1 release</td>
+<td>Owner</td>
+<td>Internal/test distribution only; no store promise</td>
+</tr>
+<tr>
+<td>Admin MFA availability (Firebase Auth MFA needs the Identity Platform upgrade)</td>
+<td>W2</td>
+<td>Owner</td>
+<td>Compensating control: re-authentication before destructive admin actions</td>
+</tr>
+<tr>
+<td>Service calendar source (holidays, no-service days, per-route service days)</td>
+<td>W4 STU-04</td>
+<td>Transport owner</td>
+<td>Keep today&#39;s honest &quot;no schedule information&quot;</td>
+</tr>
+<tr>
+<td>Trusted server identity for the maintenance job (service account used only by the job, never in the request path)</td>
+<td>W5 retention</td>
+<td>Owner</td>
+<td>Job cannot ship; retention stays manual</td>
+</tr>
+<tr>
+<td>Final acceptance sign-off role and the technical support owner</td>
+<td>W6, W7</td>
+<td>Owner</td>
+<td><strong>None</strong> — university-wide launch cannot be declared</td>
+</tr>
+</tbody></table>
+<h2>5. Workstreams</h2>
+<p>Priority meanings unchanged: <strong>P0</strong> — must pass before real university use; <strong>P1</strong> — needed for usable first-release operations; <strong>P2</strong> — later unless evidence changes priority. Sizes S/M/L are relative, not dates.</p>
+<h3>W0 — Immediate owner actions and live rehearsal (size S)</h3>
+<p>Goal: jo ban chuka hai use live database par asli phone ke saath prove karna, ORS ko server-side rakhna, aur ek pre-existing credential exposure band karna.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>W0-01</td>
+<td>P0</td>
+<td>Owner publishes the bundled Rules from Setup → Rules</td>
+<td>Admin force-end succeeds in the app; an <code>audit</code> row appears in the System tab; <code>driverStatus</code> reads are denied</td>
+</tr>
+<tr>
+<td>W0-02</td>
+<td>P1</td>
+<td>Owner deletes the stale <code>driverStatus</code> node from the live database after W0-01</td>
+<td>Node absent; nothing in the app references it</td>
+</tr>
+<tr>
+<td>W0-03</td>
+<td>P0</td>
+<td>Live rehearsal on the web app: real driver phone, real student device</td>
+<td>Start → acquiring → live → (network off) delayed → offline → (network on) reconnect → End; student sees each state with timestamps; result recorded in <code>docs/</code> with device, browser, timings and defects. <strong>Pending: device intake was skipped.</strong></td>
+</tr>
+<tr>
+<td>W0-04</td>
+<td>P0</td>
+<td>Keep OpenRouteService geocoding and directions behind the local admin-only API proxy (<code>POST /api/geo/geocode</code> and <code>POST /api/geo/directions</code>); store a newly generated key as a server secret and revoke the old key</td>
+<td>Local implementation requires Firebase token + verified email + approved active membership + admin role. Geocode <code>{query}</code> → <code>{point:{lat,lng}|null}</code>; directions <code>{start:{lat,lng},end:{lat,lng}}</code> → <code>{path:[{lat,lng}]}</code>. Request bounds and finite coordinates, provider timeout and safe visible errors are enforced; missing secret returns 503. Route editor and manual map-click routes remain allowed; provider failure never synthesizes or falls back to road geometry. Local automated/build verification passed (<a href="evidence/2026-09-13-w0-04-ors-proxy.md">evidence</a>); server-secret/new-key comparison and live-provider check passed 13 Sep; old-key revocation at ORS is still pending (the old key was still accepted at the last check), so W0-04 is not complete. No published rollout claim is made.</td>
+</tr>
+<tr>
+<td>W0-05</td>
+<td>P0</td>
+<td>Production-like auth check on the published app (AC-28)</td>
+<td>Sign-in, token refresh and one authorized mutation work through the real domain/proxy. Blocked on 13 Sep: app not published; protocol and pre-publish checks in <a href="evidence/w0-05-production-auth-check.md">evidence/w0-05-production-auth-check.md</a></td>
+</tr>
+</tbody></table>
+<p>Exit gate remains W0-01 and W0-03 recorded; W0-03 is currently pending because device intake was skipped. W0-04 additionally requires old-key revocation at ORS. The production-auth smoke check remains blocked because the app is not published; protocol and pre-publish checks are in <a href="evidence/w0-05-production-auth-check.md">evidence/w0-05-production-auth-check.md</a>.</p>
+<h3>W1 — Native driver app and background tracking (size L; PRD Stage C)</h3>
+<p>Goal: DRV-03 — supported driver phones screen-off / backgrounded hone par bhi share karte rahen, platform ke required indicators aur disclosures ke saath. Same tracking contract, same API, same identity as the web.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NAT-01</td>
+<td>P0</td>
+<td><strong>Feasibility gate first.</strong> A minimal native build (development/production build — Expo Go is not evidence) on each device class from the inventory proves screen-off tracking on a representative route (≥ 45 min), through a token refresh and one network loss/recovery, before any UI polish</td>
+<td>≥ 95 % of trip minutes have a valid ≤ 30 s sample on the healthy segment; outages listed with causes</td>
+</tr>
+<tr>
+<td>NAT-02</td>
+<td>P0</td>
+<td>Platform-required background behaviour: Android foreground service with persistent notification and background-location permission flow; iOS &quot;Always&quot; location with background mode and the system indicator; a purpose statement before the OS prompt</td>
+<td>Permission review checklist passes on each OS version in the matrix; no tracking without the visible indicator</td>
+</tr>
+<tr>
+<td>NAT-03</td>
+<td>P0</td>
+<td>Reuse the tracking contract unchanged: <code>/api/tracking/{busId}/start|sample|heartbeat|end</code>, publisher session + sequence numbers, capture vs receive timestamps, pending-end on device storage, <code>SESSION_CONFLICT</code> → idle</td>
+<td>The existing API contract tests pass unchanged against native traffic; no native-only endpoint added</td>
+</tr>
+<tr>
+<td>NAT-04</td>
+<td>P0</td>
+<td>Native preflight (DRV-02): identity, assignment, network, location services, precise location, background permission, battery-optimisation exemption (Android), notification permission (Android 13+); one actionable fix line per red item</td>
+<td>AC-07: missing background permission blocks Start with instructions and never claims live</td>
+</tr>
+<tr>
+<td>NAT-05</td>
+<td>P0</td>
+<td>Ownership and idempotency parity with the web client (single publisher, replay-safe retries, ended trips cannot revive)</td>
+<td>Real-device runs of AC-08, AC-09, AC-12, AC-15, AC-16, AC-17 recorded</td>
+</tr>
+<tr>
+<td>NAT-06</td>
+<td>P0</td>
+<td>Consistent auth (AUTH-06): Firebase ID tokens, same membership gate, sign-out clears device-held private state</td>
+<td>Same negative tests as web pass from the native client</td>
+</tr>
+<tr>
+<td>NAT-07</td>
+<td>P1</td>
+<td>Battery and mobile-data measurement per device class over representative routes; transport owner approves a budget</td>
+<td>Measured numbers in the rehearsal log; no unmeasured claim</td>
+</tr>
+<tr>
+<td>NAT-08</td>
+<td>P1</td>
+<td>Distribution route agreed (internal track / TestFlight or internal distribution); store submission not promised</td>
+<td>Signed build installable on the fleet&#39;s phones without developer tooling</td>
+</tr>
+<tr>
+<td>NAT-09</td>
+<td>P1</td>
+<td>Driver onboarding material per OS: permission walkthrough, &quot;do not force-stop&quot;, vendor battery-saver guidance (common Indian Android vendors kill background apps aggressively), charging</td>
+<td>Used in W7 onboarding; drivers complete Start without help after training</td>
+</tr>
+</tbody></table>
+<p>Proposed design: new artifact (Expo, React Native) alongside the web app; the pure tracking state machine from the web (<code>driver-tracking.ts</code>) is extracted into a shared workspace library with a platform adapter interface (browser <code>watchPosition</code> today; <code>expo-location</code> + background task tomorrow); the generated OpenAPI client is shared. Screens follow <code>DESIGN.md</code> (tiles, Work Sans, states in text). Hard limit stays: no anti-spoof guarantee, no tracking promise after force-stop or phone off (AC-25 must expire the feed honestly).</p>
+<p>Exit gate: NAT-01 met per device class; AC-10 passes. Depends on: phone inventory (§4), W0-03 baseline, distribution ownership.</p>
+<h3>W2 — Identity and access completeness (size M)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IDN-01</td>
+<td>P0</td>
+<td>Membership expiry (AUTH-02): <code>expiresAt</code> (UTC ms) on memberships; Rules deny protected reads/writes when server time ≥ <code>expiresAt</code>; API mirrors the check; UI shows <strong>expired</strong> distinct from suspended with the recovery path; admin can set/extend; default term set by the university (e.g. academic year)</td>
+<td>Rules test: approved+active member with past <code>expiresAt</code> denied on <code>routes</code> and <code>tracking</code>; UI state visible; admin extension audited</td>
+</tr>
+<tr>
+<td>IDN-02</td>
+<td>P1</td>
+<td>Revocation propagation (AC-18): suspending a member with an open tracker clears protected UI state within 60 s</td>
+<td>Test with a live listener: <code>permission_denied</code> handled, state cleared, timing recorded</td>
+</tr>
+<tr>
+<td>IDN-03</td>
+<td>P1</td>
+<td>Admin step-up: Firebase MFA if the Identity Platform upgrade is approved; otherwise re-authentication required before role changes, force-end and route delete, and audited</td>
+<td>Destructive admin action without recent re-auth is refused by the API (server checks <code>auth_time</code>)</td>
+</tr>
+<tr>
+<td>IDN-04</td>
+<td>P1</td>
+<td>Email-change path (AC-32): a changed or unverified email cannot reuse the old approval; UI explains re-verification and re-approval</td>
+<td>Rules + API test with a changed <code>email</code> claim; copy reviewed</td>
+</tr>
+<tr>
+<td>IDN-05</td>
+<td>P2</td>
+<td>Roster-assisted approval: admin uploads an approved roster (emails/roll numbers); pending members show &quot;matches roster&quot; / &quot;not on roster&quot;; approval remains a manual click</td>
+<td>No automatic activation; roster stored admin-only</td>
+</tr>
+</tbody></table>
+<p>Exit gate: negative role matrix (v1.1 §13 AC-01/02/29–32 + expiry) passes in Rules and API tests.</p>
+<h3>W3 — Fleet and route operations completion (size L)</h3>
+<p>Goal: ADM-01/02/03/04/05 ko poora karna bina Phase 3 ke working flows ko todhe.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FLT-01</td>
+<td>P0</td>
+<td><code>buses/{busId}</code> registry: canonical key = normalized registration; display label; status <code>active</code> / <code>out_of_service</code>; created/updated metadata; uniqueness by normalized registration (ADM-01)</td>
+<td>Duplicate registration rejected with the existing record named; one canonical key used by <code>memberships.assignedBusId</code>, <code>routes</code> and <code>tracking/{busId}</code>; existing values migrated by script with a collision report</td>
+</tr>
+<tr>
+<td>FLT-02</td>
+<td>P0</td>
+<td>Deactivation preserves references: a bus with an active trip cannot be deactivated; deactivated buses leave student search but keep history</td>
+<td>409 with reason; audit row</td>
+</tr>
+<tr>
+<td>FLT-03</td>
+<td>P0</td>
+<td>Start requires a serviceable bus (DRV-01 remainder): API and Rules check <code>buses/{busId}.status == active</code></td>
+<td>Driver of an out-of-service bus sees the reason in preflight; API and Rules deny Start</td>
+</tr>
+<tr>
+<td>RTE-01</td>
+<td>P0</td>
+<td>No silent straight lines (ADM-02): publish requires road geometry for every leg, or an explicit admin-acknowledged &quot;manual path&quot; flag that students see as &quot;path not verified&quot;</td>
+<td>Saving a draft without geometry stays allowed; publishing it is refused unless flagged; the flag is visible on the student route</td>
+</tr>
+<tr>
+<td>RTE-02</td>
+<td>P0</td>
+<td>Route versions + publish (ADM-03): <code>routes/{id}</code> keeps identity, <code>status</code> (<code>draft</code> / <code>published</code> / <code>archived</code>), <code>publishedVersion</code>; <code>routeVersions/{routeId}/{n}</code> immutable (stops, path, createdAt, createdBy); Start snapshots <code>routeId</code> + <code>routeVersion</code> into the feed; students see the version the active trip uses, otherwise the published one</td>
+<td>AC-19: editing and publishing during an active trip leaves that trip on its version; later trips pick the new one; interim lock retired only after this ships</td>
+</tr>
+<tr>
+<td>RTE-03</td>
+<td>P0</td>
+<td>Archive and protected delete (ADM-04): archive published routes (hidden from search, history kept); permanent delete only for never-published drafts with the existing consequence-stating confirm; anything referenced by an active trip cannot be archived/deleted</td>
+<td>AC-20, AC-22 pass; deletion of a referenced route denied with explanation</td>
+</tr>
+<tr>
+<td>RTE-04</td>
+<td>P1</td>
+<td>Route editor: preserve the draft when geocoding/ORS/save fails (AC-21) and warn before leaving with unsaved edits (v1.1 §11)</td>
+<td>Failure leaves the form populated; retry creates no duplicate; navigation prompt appears only when dirty</td>
+</tr>
+<tr>
+<td>ASG-01</td>
+<td>P1</td>
+<td>Dated assignments (ADM-05): <code>assignments/{id}</code> = driver, bus, route, route version, service date (Asia/Kolkata), shift; the standing <code>assignedBusId</code> remains the default; a dated assignment overrides it for that date/shift; conflicts (same bus+date+shift, or a driver on two buses) are shown before saving with names</td>
+<td>Conflict cases rejected or confirmed before persistence; driver preflight shows the assignment for today; no automatic trip start from a schedule</td>
+</tr>
+<tr>
+<td>ADM-10</td>
+<td>P1</td>
+<td>Explicit handover as one authorized action (ADM-06): force-end the current publisher and pre-authorize the named next driver&#39;s Start, with confirmation and a single audit record</td>
+<td>AC-23 with handover: previous phone drops to idle on its next upload; the new driver&#39;s Start succeeds; audit names both</td>
+</tr>
+</tbody></table>
+<p>Exit gate: AC-19–AC-23 pass; Rules tests extended for <code>buses</code>, <code>routeVersions</code>, <code>assignments</code>; Phase 3 flows unchanged for admins.</p>
+<h3>W4 — Student experience completion (size S–M)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>STU-04b</td>
+<td>P1</td>
+<td>&quot;No service&quot; state from an admin-managed service calendar (<code>serviceCalendar/{yyyy-mm-dd}</code> holidays, optional per-route service days); without a calendar entry the app keeps today&#39;s honest &quot;no schedule information&quot;</td>
+<td>Holiday shows &quot;no service today&quot; with the source date; never shown by guess</td>
+</tr>
+<tr>
+<td>STU-05b</td>
+<td>P1</td>
+<td>Background tabs: subscription pauses when the tab is hidden for more than 60 s and resumes with a fresh read; two open tabs never multiply writes and each holds at most one listener per view</td>
+<td>Verified with the Firebase connection counter and a two-tab test; recorded</td>
+</tr>
+<tr>
+<td>STU-07</td>
+<td>P2</td>
+<td>Preferred bus/stop stored on-device only, and only if controlled-validation feedback asks for it</td>
+<td>Not built without evidence</td>
+</tr>
+<tr>
+<td>A11Y-01</td>
+<td>P1</td>
+<td>Assistive audit (AC-24): screen-reader pass of search → result → status, <code>aria-live</code> announcements for state changes, focus moves to the selected route, keyboard access to map overlay controls, 200 % zoom and 360 px checks</td>
+<td>Findings fixed or recorded with reason; no map-only information</td>
+</tr>
+<tr>
+<td>PERF-01</td>
+<td>P2</td>
+<td>Load map code only on pages that show a map, based on a measured bundle/route timing, not speculation</td>
+<td>Measured before/after numbers in the log</td>
+</tr>
+</tbody></table>
+<p>Exit gate: A11Y-01 done; STU-05b recorded.</p>
+<h3>W5 — Security, privacy and data lifecycle hardening (size M; before any cohort)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SEC-01</td>
+<td>P0</td>
+<td>Rate limits sized to the fleet: per-uid and per-IP on tracking (sample/heartbeat ≤ 1 per second per bus), membership creation, route mutations, geo proxy; <code>429</code> with <code>Retry-After</code>; limits stated in the ops doc</td>
+<td>Load test at the agreed fleet size passes; abuse pattern is throttled and logged without payloads</td>
+</tr>
+<tr>
+<td>SEC-02</td>
+<td>P0</td>
+<td>Request bounds: JSON body limit (tracking payloads are small — tens of bytes; a 32 kB limit is generous), array limits (stops, path points), string limits on every route/membership field (audit already bounded)</td>
+<td>Oversized or malformed input rejected with 400/413 and no partial write</td>
+</tr>
+<tr>
+<td>SEC-03</td>
+<td>P0</td>
+<td>CORS allowlist (production origin + development domain) and baseline security headers</td>
+<td>Cross-origin request from an unknown origin is rejected; headers verified on the published app</td>
+</tr>
+<tr>
+<td>SEC-04</td>
+<td>P0</td>
+<td>Secrets hygiene: ORS key server-side only (W0-04); no service-account material in any bundle; secrets managed in the workspace secrets store</td>
+<td>Bundle scan clean; new key saved via secure Secrets UI, distinct from the exposed key; live-provider check passed 13 Sep; <strong>not met until the old key is revoked at ORS</strong> (old key still accepted at the last check)</td>
+</tr>
+<tr>
+<td>SEC-05</td>
+<td>P0</td>
+<td>Retention cleanup job (RTDB has no TTL): remove the residual <code>location</code> from ended feeds within 24 h, trim <code>audit</code> beyond 90 d, record <code>maintenance/{job}</code> (last run, outcome); runs on a schedule with a trusted job-only identity; failure is alertable</td>
+<td>AC-26: records past the deadline are gone after the run; a forced failure is visible</td>
+</tr>
+<tr>
+<td>SEC-06</td>
+<td>P1</td>
+<td>Backups: automated RTDB backups if the plan allows, else scheduled export to protected storage; one restore rehearsal into an isolated project</td>
+<td>Restore procedure documented and executed once</td>
+</tr>
+<tr>
+<td>SEC-07</td>
+<td>P1</td>
+<td>Log hygiene review: no tokens, no coordinates, no raw GPS payloads in logs; redaction paths configured</td>
+<td>Sample of production logs reviewed</td>
+</tr>
+<tr>
+<td>SEC-08</td>
+<td>P2</td>
+<td>Firebase App Check for web and native after compatibility verification; never a replacement for auth/Rules</td>
+<td>Enforced only after monitoring shows no legitimate rejects</td>
+</tr>
+<tr>
+<td>PRIV-01</td>
+<td>P1</td>
+<td>Driver-facing purpose statement and visible active-tracking indicator (web and native); privacy notice text approved by the university</td>
+<td>Copy approved; indicator present whenever a session is active</td>
+</tr>
+<tr>
+<td>PRIV-02</td>
+<td>P1</td>
+<td>Sign-out clears app-held private state (feed cache, pending end of another user is never reused)</td>
+<td>Test: pending end from user A is not sent after user B signs in</td>
+</tr>
+</tbody></table>
+<p>Exit gate: security checklist passes on the published app before the W7 cohort.</p>
+<h3>W6 — Observability, capacity and operational readiness (size M; before any cohort)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OPS-01</td>
+<td>P0</td>
+<td>Metrics: active trips, sample age distribution, heartbeat gaps, stale/offline share, ingest validation failures, 401/403 counts, API latency and error rate — as structured events plus an admin/internal summary endpoint</td>
+<td>Dashboard shows the v1.1 §12 metrics during a rehearsal</td>
+</tr>
+<tr>
+<td>OPS-02</td>
+<td>P0</td>
+<td>Alerts: API down, Firebase quota approaching, geo-proxy quota, retention job failure, unusual 403 spikes</td>
+<td>Each alert fired once in a drill and reached the named owner</td>
+</tr>
+<tr>
+<td>OPS-03</td>
+<td>P0</td>
+<td>Runbooks for the six v1.1 §16 incidents: bus appears offline, basemap/ORS outage, lost driver phone, wrong assignment/duplicate device, data/Rules regression, credential exposure</td>
+<td>Written, tabletop-tested with the transport owner</td>
+</tr>
+<tr>
+<td>OPS-04</td>
+<td>P0</td>
+<td>Named owners: transport operations owner, technical support owner; in-app help contact (Account page) and a documented fallback (timetable / manual dispatch)</td>
+<td>Names recorded in <code>README.md</code>; contact visible in the app</td>
+</tr>
+<tr>
+<td>OPS-05</td>
+<td>P1</td>
+<td>Capacity model signed: fleet numbers → RTDB connections/egress, API ingest rate (≈ active buses ÷ interval), viewer fan-out; budgets and alert thresholds set from it</td>
+<td>Signed by owner; thresholds configured</td>
+</tr>
+<tr>
+<td>OPS-06</td>
+<td>P1</td>
+<td>Availability check: synthetic <code>/api/healthz</code> plus an authenticated read with a monitor account during transport hours</td>
+<td>Target ≥ 99.5 % measured over the cohort period</td>
+</tr>
+<tr>
+<td>OPS-07</td>
+<td>P1</td>
+<td>Field measurement of the §12 targets: p95 capture→render ≤ 15 s; ≥ 95 % fresh minutes; End hidden ≤ 5 s; revocation ≤ 60 s; web result ≤ 3 s on 4G</td>
+<td>Numbers reported with the setup; misses listed, not hidden</td>
+</tr>
+</tbody></table>
+<p>Exit gate: production-readiness checklist (v1.1 §19) items for monitoring, budgets, retention, support ownership ticked.</p>
+<h3>W7 — Migration rehearsal, controlled validation and rollout (size M–L; Stage F)</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Pri</th>
+<th>Requirement</th>
+<th>Acceptance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MIG-01</td>
+<td>P0</td>
+<td>Inventory and comparison: legacy PostgreSQL routes vs RTDB routes — counts, IDs, normalized bus numbers, geometry presence; per-record diff and collision report (today&#39;s import preview counts only)</td>
+<td>Report reviewed; collisions resolved before any import</td>
+</tr>
+<tr>
+<td>MIG-02</td>
+<td>P0</td>
+<td>Staging rehearsal in an isolated project/emulator: import, Rules, every role exercised (AC-27)</td>
+<td>Expected records match; mismatches block cutover</td>
+</tr>
+<tr>
+<td>MIG-03</td>
+<td>P0</td>
+<td>Cutover plan: write-freeze window, final import, single authoritative store, rollback = restore an approved backup (never the legacy public-write backend)</td>
+<td>Plan approved by owner; rollback rehearsed</td>
+</tr>
+<tr>
+<td>ROL-01</td>
+<td>P0</td>
+<td>Controlled validation cohort: e.g. 2–3 buses, one shift, two weeks; §12 targets as success criteria; incident log</td>
+<td>Go/no-go review held with the transport owner</td>
+</tr>
+<tr>
+<td>ROL-02</td>
+<td>P0</td>
+<td>Onboarding: driver permission training and device guidance (NAT-09), student/staff communication, help contact, fallback communicated</td>
+<td>Drivers start unaided; support requests logged</td>
+</tr>
+<tr>
+<td>ROL-03</td>
+<td>P1</td>
+<td>Phased expansion by route groups with a go/no-go review after each phase</td>
+<td>Each phase&#39;s metrics recorded</td>
+</tr>
+</tbody></table>
+<p>Exit gate: transport owner accepts daily operations; project owner approves university-wide rollout.</p>
+<h2>6. Proposed data-model changes</h2>
+<p>Conceptual; exact paths, indices and limits validated against the live project before implementation. Every new node is default-deny, read by role, and written only through the API (the API forwards the acting user&#39;s verified token, so Rules remain the enforcement layer, as today). Two copies of the Rules exist (<code>firebase/database.rules.json</code> and the served copy under <code>artifacts/pu-transit/public/</code>); they are changed by script, tested in the emulator, and published by the owner.</p>
+<table>
+<thead>
+<tr>
+<th>Node</th>
+<th>Change</th>
+<th>Readers / writers</th>
+<th>Migration</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>memberships/{uid}</code></td>
+<td>+ <code>expiresAt</code> (UTC ms, optional)</td>
+<td>As today; Rules and API add the time check</td>
+<td>None; missing value = no expiry until the university sets a term</td>
+</tr>
+<tr>
+<td><code>buses/{busId}</code></td>
+<td>New: <code>registration</code>, <code>label</code>, <code>status</code>, <code>createdAt</code>, <code>updatedAt</code>; key = normalized registration</td>
+<td>Read: approved active members (safe directory); write: admin</td>
+<td>Seed from existing route bus numbers; script maps <code>assignedBusId</code> and route <code>busNumber</code> to the canonical key; collision report first</td>
+</tr>
+<tr>
+<td><code>routes/{id}</code></td>
+<td>+ <code>status</code>, + <code>publishedVersion</code>, + <code>busId</code> (keep <code>busNumber</code> for display)</td>
+<td>As today</td>
+<td>Existing routes become <code>published</code> version 1</td>
+</tr>
+<tr>
+<td><code>routeVersions/{routeId}/{n}</code></td>
+<td>New, immutable: <code>stops</code>, <code>pathData</code>, <code>pathSource</code> (<code>ors</code> / <code>manual</code>), <code>createdAt</code>, <code>createdBy</code></td>
+<td>Read: approved active members; write: admin (append-only, as <code>audit</code>)</td>
+<td>Version 1 copied from each existing route</td>
+</tr>
+<tr>
+<td><code>assignments/{id}</code></td>
+<td>New (P1): <code>driverUid</code>, <code>busId</code>, <code>routeId</code>, <code>routeVersion</code>, <code>serviceDate</code>, <code>shift</code>, <code>createdBy</code>, <code>createdAt</code></td>
+<td>Read: the assigned driver and admins; write: admin</td>
+<td>None; standing <code>assignedBusId</code> stays the default</td>
+</tr>
+<tr>
+<td><code>tracking/{busId}.feed</code></td>
+<td>+ <code>routeId</code>, + <code>routeVersion</code> snapshot at Start</td>
+<td>As today</td>
+<td>Old feeds without the fields read as &quot;version unknown&quot;</td>
+</tr>
+<tr>
+<td><code>serviceCalendar/{yyyy-mm-dd}</code></td>
+<td>New (P1): <code>noService: true</code>, <code>note</code></td>
+<td>Read: approved active members; write: admin</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>maintenance/{job}</code></td>
+<td>New: <code>lastRunAt</code>, <code>outcome</code>, <code>removed</code></td>
+<td>Read: admin; write: job identity only</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>audit</code></td>
+<td>+ actions: <code>bus.*</code>, <code>route.publish</code>, <code>route.archive</code>, <code>assignment.*</code>, <code>tracking.handover</code>, <code>membership.extend</code></td>
+<td>As today</td>
+<td>None</td>
+</tr>
+</tbody></table>
+<p>Invariants carried from v1.1 §9 and unchanged: one active publisher per bus; conditional (transactional) ownership on Start/handover; no acknowledgement of End before the feed is updated; idempotency by trip/session/sequence; UTC storage, Asia/Kolkata display; no schedule-driven automatic Start; no listeners on the whole database.</p>
+<h2>7. Acceptance scenarios still open (v1.1 §13)</h2>
+<table>
+<thead>
+<tr>
+<th>AC</th>
+<th>Status today</th>
+<th>Remaining</th>
+<th>Workstream</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AC-01, 02, 29, 30, 31</td>
+<td>Denied in Rules and API tests</td>
+<td>Re-run on the published app (AC-28 conditions)</td>
+<td>W0-05</td>
+</tr>
+<tr>
+<td>AC-03, 04, 05</td>
+<td>Verified on the web in review</td>
+<td>Re-run during the cohort on real 4G devices</td>
+<td>W7</td>
+</tr>
+<tr>
+<td>AC-06, 14, 17</td>
+<td>API + Rules tests</td>
+<td>Real-device run from the native client</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AC-07</td>
+<td>Web preflight covers location permission</td>
+<td>Native background-permission preflight</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AC-08, 09</td>
+<td>API concurrency tests</td>
+<td>Two physical devices</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AC-10</td>
+<td>Not possible on the web</td>
+<td>Native screen-off route</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AC-11, 12, 13</td>
+<td>State-aging and client tests</td>
+<td>Field run with a real network loss</td>
+<td>W0-03 / W1</td>
+</tr>
+<tr>
+<td>AC-15, 16</td>
+<td>Client tests (pending end)</td>
+<td>Field run</td>
+<td>W0-03 / W1</td>
+</tr>
+<tr>
+<td>AC-18</td>
+<td>Rules deny on the next read</td>
+<td>Measure UI clear ≤ 60 s</td>
+<td>W2</td>
+</tr>
+<tr>
+<td>AC-19</td>
+<td>Interim lock only</td>
+<td>Route versions</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>AC-20, 22</td>
+<td>Implemented (lock, confirm)</td>
+<td>Re-verify after archive/version changes</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>AC-21</td>
+<td>Failures are loud</td>
+<td>Confirm draft preservation and no duplicate on retry</td>
+<td>W3</td>
+</tr>
+<tr>
+<td>AC-23</td>
+<td>Built; blocked on the Rules publish</td>
+<td>Verify after W0-01; extend to handover</td>
+<td>W0 / W3</td>
+</tr>
+<tr>
+<td>AC-24</td>
+<td>Keyboard and text states in place</td>
+<td>Screen-reader and zoom audit</td>
+<td>W4</td>
+</tr>
+<tr>
+<td>AC-25</td>
+<td>Heartbeat expiry implemented</td>
+<td>Force-stop / power-off drill on native</td>
+<td>W1</td>
+</tr>
+<tr>
+<td>AC-26</td>
+<td>Nothing</td>
+<td>Retention job</td>
+<td>W5</td>
+</tr>
+<tr>
+<td>AC-27</td>
+<td>Import preview only</td>
+<td>Staging rehearsal with comparison</td>
+<td>W7</td>
+</tr>
+<tr>
+<td>AC-28</td>
+<td>Not run</td>
+<td>Published-app auth check</td>
+<td>W0-05</td>
+</tr>
+<tr>
+<td>AC-32</td>
+<td>Email binding in Rules</td>
+<td>Flow test and UI copy</td>
+<td>W2</td>
+</tr>
+</tbody></table>
+<h2>8. Delivery order, sizes and gates</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Scope</th>
+<th>Size</th>
+<th>Depends on</th>
+<th>Exit gate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R0</td>
+<td>W0 owner actions, live web rehearsal, ORS proxy, published-app auth check</td>
+<td>S</td>
+<td>Owner, one driver phone</td>
+<td>Force-end works; rehearsal log written</td>
+</tr>
+<tr>
+<td>R1</td>
+<td>§4 decisions batch (inventory, owners, retention, scale, budgets, distribution)</td>
+<td>S</td>
+<td>University input</td>
+<td>Decisions recorded in <code>README.md</code></td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Native feasibility spike (NAT-01) per device class</td>
+<td>M</td>
+<td>R1 inventory</td>
+<td>Screen-off proof met, or an explicit alternative decided (other native approach or vehicle GPS hardware) — never a quiet downgrade to browser tracking</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>Native driver app (rest of W1)</td>
+<td>L</td>
+<td>R2</td>
+<td>AC-10 and NAT-05 field runs pass</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>W3 fleet/route operations</td>
+<td>L</td>
+<td>R0</td>
+<td>AC-19–AC-23 pass; can run in parallel with R3 (separate code areas)</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>W2 identity completeness</td>
+<td>M</td>
+<td>R0</td>
+<td>Negative matrix passes; parallel with R3/R4</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>W5 hardening + W4 student completion</td>
+<td>M</td>
+<td>R0</td>
+<td>Security checklist and A11Y-01 done before any cohort</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>W6 observability and ops readiness</td>
+<td>M</td>
+<td>R1 owners</td>
+<td>Alert drill and runbook tabletop done</td>
+</tr>
+<tr>
+<td>R8</td>
+<td>W7 migration rehearsal + controlled cohort</td>
+<td>M–L</td>
+<td>R3, R4, R6, R7</td>
+<td>Transport owner go decision</td>
+</tr>
+<tr>
+<td>R9</td>
+<td>Phased university-wide expansion</td>
+<td>M</td>
+<td>R8</td>
+<td>Owner approval per phase</td>
+</tr>
+</tbody></table>
+<p>The v1.1 rule stands: decorative UI work waits until R2/R3 prove background tracking and R5 completes authorization.</p>
+<h2>9. Definition of done — university-wide daily use (v1.1 §19, current state)</h2>
+<ul>
+<li><input disabled="" type="checkbox"> All P0 requirements and core first-release P1 workflows implemented — <strong>open</strong> (DRV-03, ADM-01/02/03/04 remainder, IDN-01, SEC-01–05, OPS-01–04)</li>
+<li><input checked="" disabled="" type="checkbox"> Full role matrix and Rules tests for the built scope pass — extend for every new node</li>
+<li><input disabled="" type="checkbox"> Screen-off / background trials pass on each supported real device class — <strong>not started</strong></li>
+<li><input disabled="" type="checkbox"> Cross-device Start → Live → Delayed/Offline → Reconnect → End passes — <strong>web rehearsal pending (W0-03); native pending</strong></li>
+<li><input disabled="" type="checkbox"> No public GPS writes, no hardcoded privileged credentials, working map provider — <strong>W0-04 local automated/build verification passed; server-secret/new-key comparison and live-provider check passed 13 Sep; old-key revocation at ORS remains open (old key still accepted at the last check), so W0-04 is not complete</strong></li>
+<li><input disabled="" type="checkbox"> Migration rehearsal, route data comparison and recovery procedure accepted — <strong>not started</strong></li>
+<li><input disabled="" type="checkbox"> Monitoring, budget alerts, retention cleanup and support ownership ready — <strong>not started</strong></li>
+<li><input disabled="" type="checkbox"> Accessibility/core responsive checks and real driver onboarding completed — <strong>responsive checks done at 390/1440; screen-reader audit and onboarding open</strong></li>
+<li><input disabled="" type="checkbox"> Transport owner validates field operation; project owner approves rollout — <strong>open</strong></li>
+</ul>
+<h2>10. Risks specific to the remaining work</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation / gate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Driver phone inventory never arrives</td>
+<td>R2 spike on loaner devices as feasibility only; no supported-matrix claim; launch decision explicitly blocked</td>
+</tr>
+<tr>
+<td>OS background restrictions and vendor battery savers on the fleet&#39;s Android phones</td>
+<td>NAT-02/NAT-09 onboarding, measured trials per device class, visible indicator, honest heartbeat expiry</td>
+</tr>
+<tr>
+<td>Rules complexity grows with buses, versions, assignments</td>
+<td>Emulator test matrix as a gate; both Rules copies edited by script; publish only after tests</td>
+</tr>
+<tr>
+<td>Retention job needs a trusted identity that the request path deliberately does not have</td>
+<td>Job-only service identity, never loaded by the API request path; documented in the runbook</td>
+</tr>
+<tr>
+<td>Canonical bus key migration touches memberships, routes and tracking at once</td>
+<td>Script with a dry-run collision report; run during a no-trip window; rollback = restore</td>
+</tr>
+<tr>
+<td>Scope creep into &quot;Later&quot; items (ETA, notifications) before gates</td>
+<td>This document is the Now list; changes recorded here, not slipped in</td>
+</tr>
+<tr>
+<td>New screens drift from the design system</td>
+<td><code>DESIGN.md</code> is normative for every new surface; review captures at 390 and 1440</td>
+</tr>
+</tbody></table>
+<h2>11. Sources</h2>
+<ul>
+<li><code>README.md</code> §2–§5 — current status, requirement matrix and decisions log</li>
+<li><code>docs/PU-Transit-PRD.md</code> v1.1 — original requirements, tracking contract, security and rollout policy</li>
+<li><code>docs/Phase-2-Reliable-Tracking.md</code> — implemented tracking contract</li>
+<li><code>docs/Firebase-Setup.md</code> — Rules publication procedure</li>
+<li><code>artifacts/pu-transit/DESIGN.md</code>, <code>artifacts/pu-transit/PRODUCT.md</code> — visual system and product truth for new surfaces</li>
+</ul>
+<h2>Changelog</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2.0</td>
+<td>2026-09-12</td>
+<td>First remaining-work PRD after Phase 3: eight workstreams, decisions register, data-model deltas, open acceptance scenarios, delivery order and current definition-of-done state</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>2026-09-13</td>
+<td>W0-04 local automated/build verification passed (<a href="evidence/2026-09-13-w0-04-ors-proxy.md">evidence</a>); server-secret/new-key comparison and live-provider check passed 13 Sep; old-key revocation at ORS remains pending (old key still accepted at the last check); W0-03 remains pending after skipped device intake</td>
+</tr>
+</tbody></table>
+<p><em>PU Transit — Remaining Work PRD · 13 September 2026 · Proposal/status record; nothing here is a claim of published or fully complete functionality.</em></p>
+</main></body></html>

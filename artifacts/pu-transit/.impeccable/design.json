@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-12T14:35:48Z",
+  "title": "Design System: PU Transit",
+  "extensions": {
+    "colorMeta": {
+      "pu-blue": {
+        "role": "primary",
+        "displayName": "PU Blue",
+        "canonical": "#0A76D6",
+        "tonalRamp": ["#031A2F", "#06345E", "#084F8E", "#0A69BD", "#0A76D6", "#3D95E2", "#83BCEA", "#D7EBFA"]
+      },
+      "cool-grey-ground": {
+        "role": "neutral",
+        "displayName": "Cool-Grey Ground",
+        "canonical": "#F6F7FB",
+        "tonalRamp": ["#20222B", "#3D414E", "#5D6271", "#818694", "#A8ACB7", "#CDD0D8", "#E7E9EE", "#F6F7FB"]
+      },
+      "near-black-ink": {
+        "role": "neutral",
+        "displayName": "Near-Black Ink",
+        "canonical": "#0F1B2D",
+        "tonalRamp": ["#0F1B2D", "#26354A", "#415169", "#61728B", "#8797AC", "#AFBCCB", "#D6DDE5", "#F1F4F7"]
+      },
+      "white-ink": {
+        "role": "neutral",
+        "displayName": "White Ink",
+        "canonical": "#FFFFFF",
+        "tonalRamp": ["#262626", "#404040", "#595959", "#737373", "#999999", "#BFBFBF", "#E6E6E6", "#FFFFFF"]
+      },
+      "fault-crimson": {
+        "role": "secondary",
+        "displayName": "Fault Crimson",
+        "canonical": "#AE2338",
+        "tonalRamp": ["#300A10", "#57111C", "#7D1928", "#A42034", "#AE2338", "#D65A6C", "#E99AA5", "#F8DDE1"]
+      },
+      "slate-border": {
+        "role": "neutral",
+        "displayName": "Slate Border",
+        "canonical": "#7F8DA3",
+        "tonalRamp": ["#1D222A", "#343D4A", "#4D5969", "#687689", "#7F8DA3", "#A6B0BF", "#CDD3DC", "#EEF0F4"]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#506077",
+        "tonalRamp": ["#151A21", "#293240", "#3E4A5C", "#506077", "#77869A", "#A1ADBC", "#CDD3DC", "#EFF2F5"]
+      },
+      "ended-field": {
+        "role": "neutral",
+        "displayName": "Ended Field",
+        "canonical": "rgba(15, 27, 45, 0.10)",
+        "tonalRamp": ["#1A2029", "#343B46", "#515966", "#727A87", "#969DA8", "#BCC1C9", "#DEE1E5", "#F3F4F6"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page headlines and clipped bus-number panoramas."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Major blocks and state words."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Bus rows and compact typographic tiles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Operational copy, labels, and controls."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "One lowercase label above a field."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "metro-ease",
+        "value": "cubic-bezier(0.1, 0.9, 0.2, 1)",
+        "purpose": "Exponential Metro easing shared by tile presses, page entrances, and live-state flips."
+      },
+      {
+        "name": "tile-press",
+        "value": "transform 120ms cubic-bezier(0.1, 0.9, 0.2, 1)",
+        "purpose": "Tilts a pressed tile with perspective(600px) rotateX(4deg) scale(0.985)."
+      },
+      {
+        "name": "turnstile-entrance",
+        "value": "600ms cubic-bezier(0.1, 0.9, 0.2, 1)",
+        "purpose": "Sweeps page content from rotateY(-60deg) to 0deg once per page."
+      },
+      {
+        "name": "live-tile-flip",
+        "value": "600ms cubic-bezier(0.1, 0.9, 0.2, 1)",
+        "purpose": "Flips an accepted live sample from rotateX(-90deg) to 0deg."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Removes Metro turnstile, live flip, and press transforms while preserving state color changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Tile Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action or current selection, flooded PU blue with white ink.",
+      "html": "<button class=\"ds-btn-primary\">search <svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></svg></button>",
+      "css": ".ds-btn-primary{min-height:3.5rem;display:inline-flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border:0;border-radius:0;background:hsl(var(--primary,209 91% 44%));color:hsl(var(--primary-foreground,0 0% 100%));font:400 1.125rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif;transition:transform 120ms cubic-bezier(.1,.9,.2,1)}.ds-btn-primary svg{width:1.5rem;height:1.5rem;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.ds-btn-primary:hover{background:hsl(var(--primary,209 91% 44%))}.ds-btn-primary:active{transform:perspective(600px) rotateX(4deg) scale(.985)}.ds-btn-primary:focus-visible{outline:3px solid currentColor;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-btn-primary{transition:none}.ds-btn-primary:active{transform:none}}"
+    },
+    {
+      "name": "Outline Tile Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "A secondary or waiting action on white with a structural near-black outline.",
+      "html": "<button class=\"ds-btn-outline\">back to results</button>",
+      "css": ".ds-btn-outline{min-height:3.5rem;display:inline-flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border:2px solid hsl(var(--foreground,217 50% 12%));border-radius:0;background:#fff;color:hsl(var(--foreground,217 50% 12%));font:400 1.125rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif;transition:transform 120ms cubic-bezier(.1,.9,.2,1)}.ds-btn-outline:hover{background:#fff;color:hsl(var(--foreground,217 50% 12%))}.ds-btn-outline:active{transform:perspective(600px) rotateX(4deg) scale(.985)}.ds-btn-outline:focus-visible{outline:3px solid currentColor;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-btn-outline{transition:none}.ds-btn-outline:active{transform:none}}"
+    },
+    {
+      "name": "Destructive Tile Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "A confirmed destructive action, shown only after its consequence is stated.",
+      "html": "<button class=\"ds-btn-destructive\">yes, end trip</button>",
+      "css": ".ds-btn-destructive{min-height:3.5rem;display:inline-flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.25rem;border:0;border-radius:0;background:hsl(var(--destructive,352 66% 41%));color:#fff;font:400 1.125rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif;transition:transform 120ms cubic-bezier(.1,.9,.2,1)}.ds-btn-destructive:hover{background:hsl(var(--destructive,352 66% 41%))}.ds-btn-destructive:active{transform:perspective(600px) rotateX(4deg) scale(.985)}.ds-btn-destructive:focus-visible{outline:3px solid currentColor;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-btn-destructive{transition:none}.ds-btn-destructive:active{transform:none}}"
+    },
+    {
+      "name": "Metro Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "One lowercase label above one square white field with near-black ink and a slate outline.",
+      "html": "<label class=\"ds-field\"><span>bus number</span><input placeholder=\"GJ 06 … or the last four digits\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:.5rem;color:hsl(var(--foreground,217 50% 12%));font:400 1.125rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif;text-transform:lowercase}.ds-field input{box-sizing:border-box;width:100%;height:3.5rem;border:2px solid hsl(var(--border,215 16% 57%));border-radius:0;background:#fff;color:hsl(var(--foreground,217 50% 12%));caret-color:hsl(var(--primary,209 91% 44%));padding:0 1rem;font:400 1.25rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif}.ds-field input::placeholder{color:hsl(var(--muted-foreground,215 20% 39%))}.ds-field input:hover{background:#fff}.ds-field input:focus-visible{outline:3px solid currentColor;outline-offset:3px}.ds-field input[aria-invalid=true]{border-color:hsl(var(--destructive,352 66% 41%))}"
+    },
+    {
+      "name": "Live State Tile",
+      "kind": "custom",
+      "refersTo": "state-live",
+      "description": "One state word, one age, and one outline glyph on the live PU-blue field.",
+      "html": "<div class=\"ds-state-live\" role=\"status\"><span class=\"ds-state-word\">live</span><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><polygon points=\"3 11 22 2 13 21 11 13 3 11\"></polygon></svg><span class=\"ds-state-age\">8 s ago</span></div>",
+      "css": ".ds-state-live{box-sizing:border-box;position:relative;min-height:6rem;display:flex;flex-direction:column;justify-content:space-between;padding:.75rem 1.25rem;border:0;border-radius:0;background:hsl(var(--primary,209 91% 44%));color:#fff;font-family:'Work Sans Variable','Work Sans',system-ui,sans-serif;animation:ds-state-flip 600ms cubic-bezier(.1,.9,.2,1) both;backface-visibility:hidden}.ds-state-word{font-size:2.5rem;font-weight:200;line-height:.95;letter-spacing:-.03em;text-transform:lowercase}.ds-state-live svg{position:absolute;right:1.25rem;top:.75rem;width:1.75rem;height:1.75rem;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.ds-state-age{font-size:1rem;font-variant-numeric:tabular-nums}@keyframes ds-state-flip{from{transform:perspective(900px) rotateX(-90deg)}to{transform:perspective(900px) rotateX(0)}}@media(prefers-reduced-motion:reduce){.ds-state-live{animation:none}}"
+    },
+    {
+      "name": "Waiting State Tile",
+      "kind": "custom",
+      "refersTo": "state-waiting",
+      "description": "A waiting stamp: white field, 2px near-black outline, near-black state text.",
+      "html": "<div class=\"ds-state-waiting\" role=\"status\"><span>finding gps</span><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg></div>",
+      "css": ".ds-state-waiting{box-sizing:border-box;position:relative;min-height:6rem;padding:.75rem 1.25rem;border:2px solid hsl(var(--foreground,217 50% 12%));border-radius:0;background:#fff;color:hsl(var(--foreground,217 50% 12%));font:200 2.5rem/.95 'Work Sans Variable','Work Sans',system-ui,sans-serif;letter-spacing:-.03em;text-transform:lowercase}.ds-state-waiting svg{position:absolute;right:1.25rem;top:.75rem;width:1.75rem;height:1.75rem;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.ds-state-waiting:hover{background:#fff}.ds-state-waiting:focus-visible{outline:3px solid currentColor;outline-offset:3px}"
+    },
+    {
+      "name": "Metro App Bar Item",
+      "kind": "nav",
+      "description": "A lowercase navigation label under a 44px circled Lucide stamp on the PU-blue app bar.",
+      "html": "<a class=\"ds-nav-item ds-nav-active\" href=\"#\"><span class=\"ds-nav-stamp\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"8\"></circle><path d=\"m21 21-4.3-4.3\"></path></svg></span><span>find</span></a>",
+      "css": ".ds-nav-item{min-width:3.5rem;display:inline-flex;flex-direction:column;align-items:center;gap:.25rem;padding:.5rem 0;background:hsl(var(--primary,209 91% 44%));color:#fff;font:400 .75rem/1.4 'Work Sans Variable','Work Sans',system-ui,sans-serif;text-decoration:none;text-transform:lowercase}.ds-nav-stamp{box-sizing:border-box;width:2.75rem;height:2.75rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff;border-radius:50%;background:transparent;color:#fff}.ds-nav-stamp svg{width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}.ds-nav-item:hover{color:#fff}.ds-nav-item:focus-visible{outline:3px solid currentColor;outline-offset:3px}.ds-nav-active{font-weight:500}.ds-nav-active .ds-nav-stamp{border-color:#fff;background:#fff;color:hsl(var(--primary,209 91% 44%))}"
+    },
+    {
+      "name": "Admin Pivot",
+      "kind": "nav",
+      "description": "A horizontally scrolling row of large lowercase section words.",
+      "html": "<div class=\"ds-pivot\" role=\"tablist\" aria-label=\"admin sections\"><button role=\"tab\" aria-selected=\"true\">fleet</button><button role=\"tab\" aria-selected=\"false\">routes</button><button role=\"tab\" aria-selected=\"false\">users</button></div>",
+      "css": ".ds-pivot{display:flex;gap:2rem;overflow-x:auto;white-space:nowrap;background:hsl(var(--background,228 38% 97%))}.ds-pivot button{flex:none;padding:.5rem 0;border:0;border-radius:0;background:transparent;color:hsl(var(--foreground,217 50% 12%)/.55);font:200 2.25rem/.95 'Work Sans Variable','Work Sans',system-ui,sans-serif;letter-spacing:-.03em;text-transform:lowercase;transition:color 120ms linear}.ds-pivot button:hover{color:hsl(var(--foreground,217 50% 12%)/.8)}.ds-pivot button[aria-selected=true]{color:hsl(var(--foreground,217 50% 12%))}.ds-pivot button:focus-visible{outline:3px solid currentColor;outline-offset:3px}@media(min-width:768px){.ds-pivot button{font-size:3rem}}"
+    },
+    {
+      "name": "Leaflet Metro Control",
+      "kind": "custom",
+      "description": "Square white map controls with near-black ink and no elevation.",
+      "html": "<div class=\"ds-map-control\" aria-label=\"map zoom\"><button aria-label=\"zoom in\">+</button><button aria-label=\"zoom out\">−</button></div>",
+      "css": ".ds-map-control{width:2.75rem;border:2px solid hsl(var(--foreground,217 50% 12%));border-radius:0;background:#fff;box-shadow:none}.ds-map-control button{display:block;box-sizing:border-box;width:2.75rem;height:2.75rem;padding:0;border:0;border-bottom:2px solid hsl(var(--foreground,217 50% 12%));border-radius:0;background:#fff;color:hsl(var(--foreground,217 50% 12%));font:300 1.5rem/2.75rem 'Work Sans Variable','Work Sans',system-ui,sans-serif}.ds-map-control button:last-child{border-bottom:0}.ds-map-control button:hover{background:#fff;color:hsl(var(--foreground,217 50% 12%))}.ds-map-control button:focus-visible{outline:3px solid currentColor;outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Living Number Plate",
+    "overview": "PU Transit is a Metro typographic-tile world built for a fast outdoor glance. A cool-grey plate carries near-black type; large, light words and solid state fields make one bus, one state, and one age more prominent than interface chrome. PU blue is the one committed color, flooding live truth, primary action, current selection, route line, and the app bar. The system rejects dashboards, cards, decorative headings, gradients, shadows, and ornamental layering.\n\nTruth is visible rather than reassuring: a tracking claim always travels with its age, and each state has a distinct field treatment. Motion is physical and brief—a pressed tile tilts in 120ms, page content makes one 600ms turnstile sweep, and accepted live samples flip on the X axis for 600ms with the Metro exponential curve (`cubic-bezier(0.1, 0.9, 0.2, 1)`). Reduced-motion mode removes these three transforms while retaining immediate color changes.",
+    "keyCharacteristics": [
+      "Cool-grey ground with one dominant PU-blue signal.",
+      "Giant, light, mostly lowercase Work Sans headlines.",
+      "Square solid fields, deep gutters, and no card chrome.",
+      "Text, age, and shape communicate state together.",
+      "Lucide outline icons and a responsive Metro app bar."
+    ],
+    "rules": [
+      {
+        "name": "The One Blue Rule",
+        "body": "PU blue means live truth, the primary action, the current selection, route line, or app bar; do not spend it on decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The State Stamp Rule",
+        "body": "Live is PU blue with white ink; waiting is white with a 2px near-black outline; faults are crimson with white ink; ended is a 10% near-black wash.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lowercase Signal Rule",
+        "body": "Set interface headlines and labels in lowercase; preserve the natural case of bus registrations, account identifiers, and other data.",
+        "section": "typography"
+      },
+      {
+        "name": "The Panorama Rule",
+        "body": "Bus-number headlines may deliberately stay on one line and clip at the right edge. Every other headline wraps with balanced text and may break long words.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Truth Rule",
+        "body": "Use tabular numerals for ages, times, route indexes, GPS values, and changing counts so updates do not shift the layout.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Ground Rule",
+        "body": "Never add a shadow or gradient to separate a surface; use a solid state field, an outline, a divider, or space.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use PU blue only for live truth, the primary action, the current selection, route line, or app bar.",
+      "Do show a tracking state's age and textual name; color is never the sole signal.",
+      "Do let bus-number headlines clip at the right edge while balancing and wrapping other headlines.",
+      "Do provide one visible label per state or field, not two competing labels.",
+      "Do explain the consequence and ask for confirmation before end, delete, force-end, import, or another irreversible action.",
+      "Do use Lucide outline icons, visible focus, at least 44px touch targets, and a textual non-map route equivalent."
+    ],
+    "donts": [
+      "Don't add cards, rounded surface corners, shadows, gradients, or decorative elevation.",
+      "Don't use kickers or eyebrows; the university name belongs only in the app bar wordmark.",
+      "Don't use glyph characters, emoji, icon fonts, or a system display face in place of the self-hosted Work Sans and Lucide vocabulary.",
+      "Don't animate turnstiles, flips, or press transforms when reduced motion is requested.",
+      "Don't imply that a bus is live without a fresh, server-accepted sample."
+    ]
+  }
+}

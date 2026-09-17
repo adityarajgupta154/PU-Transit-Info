@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PU Transit - Smart Bus Tracking</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="menu-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars"></i>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <i class="fa-solid fa-bus-simple fa-2x" style="color: var(--primary-color);"></i>
+            <h3 style="margin-top: 0.5rem; color: var(--primary-color);">PU Transit</h3>
+        </div>
+        <a href="index.html"><i class="fa-solid fa-house" style="width: 24px;"></i> Home</a>
+        <a href="student.html"><i class="fa-solid fa-graduation-cap" style="width: 24px;"></i> Student</a>
+        <a href="admin.html"><i class="fa-solid fa-user-gear" style="width: 24px;"></i> Admin Portal</a>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="container">
+        <header class="hero-section fade-in">
+            <div class="logo">
+                <i class="fa-solid fa-bus-simple fa-2x" style="color: var(--primary-color); margin-bottom: 1rem;"></i>
+            </div>
+            <h1 class="hero-title">PU Transit</h1>
+            <p class="hero-subtitle">University bus tracking system. Connects students and
+                administration for a seamless commute.</p>
+        </header>
+
+        <main class="role-grid fade-in" style="animation-delay: 0.2s;">
+            <!-- Student Card (Centered)-->
+            <a href="student.html" class="role-card glass-card"
+                style="grid-column: 1 / -1; max-width: 400px; margin: 0 auto;">
+                <div class="role-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <h3>Student</h3>
+                <p style="color: var(--text-muted); margin: 1rem 0;">View bus routes, track live locations, and check
+                    estimated arrival times.</p>
+                <span class="btn btn-secondary">Track Bus <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+
+            <!-- Admin Card Removed - Moved to Hamburger Menu -->
+        </main>
+
+        <footer style="text-align: center; margin-top: 4rem; color: var(--text-muted); padding-bottom: 2rem;"
+            class="fade-in" style="animation-delay: 0.4s;">
+            <p>&copy; 2026 PU Transit. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+    </script>
+
+</body>
+
+</html>

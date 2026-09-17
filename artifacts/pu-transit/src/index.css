@@ -1,0 +1,369 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/work-sans';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-primary-border: var(--sidebar-primary-border);
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-accent-border: var(--sidebar-accent-border);
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* METRO TILES on PU BLUE — one theme, light ground. Palette from the university's own
+   app screen (12 Sep 2026): PU blue field, white cards, cool-grey ground, crimson errors.
+   Tiles stay square and flat; only the ink changed. No dark mode on purpose: the phone
+   is read outdoors at a bus stop, and dark ink on a light plate wins in sunlight. */
+:root {
+  color-scheme: light;
+
+  --button-outline: hsl(217 50% 12%);
+  --badge-outline: hsl(217 50% 12% / 0.4);
+  --opaque-button-border-intensity: 0;
+  --elevate-1: rgba(15, 27, 45, 0.06);
+  --elevate-2: rgba(15, 27, 45, 0.12);
+
+  /* ground + ink */
+  --background: 228 38% 97%;
+  --foreground: 217 50% 12%;
+
+  /* slate: input boxes and dividers (3.4:1 on white) */
+  --border: 215 16% 57%;
+  --input: 215 16% 57%;
+  --ring: 217 50% 12%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 217 50% 12%;
+  --card-border: 215 16% 57%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 217 50% 12%;
+  --popover-border: 215 16% 57%;
+
+  /* PU blue: live state, primary action, selection flood, the app bar (white ink, 4.6:1) */
+  --primary: 209 91% 44%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 100%;
+  --secondary-foreground: 217 50% 12%;
+
+  --muted: 217 50% 12% / 0.1;
+  --muted-foreground: 215 20% 39%;
+
+  --accent: 0 0% 100%;
+  --accent-foreground: 217 50% 12%;
+
+  /* crimson (the reference's error red): faults (offline / conflict / GPS lost) and destructive actions */
+  --destructive: 352 66% 41%;
+  --destructive-foreground: 0 0% 100%;
+
+  --sidebar: 209 91% 44%;
+  --sidebar-foreground: 0 0% 100%;
+  --sidebar-border: 0 0% 100%;
+  --sidebar-primary: 0 0% 100%;
+  --sidebar-primary-foreground: 209 91% 44%;
+  --sidebar-accent: 0 0% 100% / 0.15;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 0 0% 100%;
+
+  --chart-1: 209 91% 44%;
+  --chart-2: 217 50% 12%;
+  --chart-3: 352 66% 41%;
+  --chart-4: 215 20% 39%;
+  --chart-5: 215 16% 57%;
+
+  --app-font-sans: 'Work Sans Variable', 'Work Sans', system-ui, sans-serif;
+  --app-font-serif: Georgia, serif;
+  --app-font-mono: ui-monospace, Menlo, monospace;
+  --radius: 0rem;
+
+  /* no elevation in this world */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --primary-border: hsl(var(--primary));
+  --secondary-border: hsl(var(--secondary));
+  --muted-border: hsl(var(--muted));
+  --accent-border: hsl(var(--accent));
+  --destructive-border: hsl(var(--destructive));
+
+  /* metro motion */
+  --metro-ease: cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background: hsl(228 38% 97%);
+    scrollbar-color: hsl(215 16% 57%) hsl(228 38% 97%);
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-size: 1.125rem;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    accent-color: hsl(var(--primary));
+    caret-color: hsl(var(--primary));
+  }
+
+  ::selection {
+    background: hsl(var(--primary));
+    color: #fff;
+  }
+
+  /* The ring takes the ink of whatever it sits on: dark on the light plate, white on blue tiles and the app bar. */
+  :focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* Metro headline: light, lowercase, allowed to clip the right edge. */
+  .metro-headline {
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    text-transform: lowercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  /* Panorama clip: one line that runs off the right edge on purpose (bus numbers, long names). */
+  .metro-headline-clip {
+    /* after text-wrap: balance on purpose — white-space resets text-wrap-mode to nowrap */
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* Tile press: tilts like a physical tile. */
+  .metro-tile {
+    transform-origin: center;
+    transition: transform 120ms var(--metro-ease);
+  }
+  .metro-tile:active {
+    transform: perspective(600px) rotateX(4deg) scale(0.985);
+  }
+
+  /* Turnstile entrance from the left, once per page. */
+  .metro-turnstile {
+    transform-origin: left center;
+    animation: metro-turnstile 600ms var(--metro-ease) both;
+  }
+  /* Content stays visible throughout: the sweep is the moment, never a fade-in. */
+  @keyframes metro-turnstile {
+    from { transform: perspective(1200px) rotateY(-60deg); }
+    to { transform: perspective(1200px) rotateY(0deg); }
+  }
+
+  /* Live tile flip on each accepted sample. */
+  .metro-flip {
+    animation: metro-flip 600ms var(--metro-ease) both;
+    backface-visibility: hidden;
+  }
+  @keyframes metro-flip {
+    from { transform: perspective(900px) rotateX(-90deg); }
+    to { transform: perspective(900px) rotateX(0deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metro-turnstile, .metro-flip { animation: none; }
+    .metro-tile:active { transform: none; }
+    /* Everything else (toasts, spinners, scrolling) collapses to instant. */
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Leaflet chrome in the same language: square, white, ink text, no shadows.
+ * Kept out of @layer on purpose: Leaflet's own stylesheet is unlayered and is
+ * injected after this file, so layered overrides would lose every tie.
+ */
+.leaflet-container .leaflet-bar.leaflet-control {
+  border: 2px solid hsl(var(--foreground));
+  border-radius: 0;
+  box-shadow: none;
+}
+.leaflet-container .leaflet-bar.leaflet-control a,
+.leaflet-container .leaflet-bar.leaflet-control a:hover,
+.leaflet-container .leaflet-bar.leaflet-control a:focus {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  background: #fff;
+  color: hsl(var(--foreground));
+  border-bottom: 2px solid hsl(var(--foreground));
+  border-radius: 0;
+  font-weight: 300;
+}
+.leaflet-container .leaflet-bar.leaflet-control a:last-child {
+  border-bottom: 0;
+}
+.leaflet-container .leaflet-bar.leaflet-control a.leaflet-disabled {
+  background: #fff;
+  color: hsl(var(--foreground) / 0.35);
+}
+/* MapLibre draws its own white attribution inside the GL layer; Leaflet's control carries the same text. */
+.leaflet-container .maplibregl-ctrl-attrib {
+  display: none;
+}
+.leaflet-container .leaflet-control-attribution.leaflet-control {
+  background: #fff;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  padding: 2px 6px;
+}
+.leaflet-container .leaflet-control-attribution.leaflet-control a {
+  color: hsl(var(--foreground));
+}
+.leaflet-container .leaflet-control-attribution.leaflet-control .leaflet-attribution-flag {
+  display: none !important;
+}
+.leaflet-container .leaflet-popup .leaflet-popup-content-wrapper,
+.leaflet-container .leaflet-popup .leaflet-popup-tip {
+  background: hsl(var(--foreground));
+  color: #fff;
+  border-radius: 0;
+  box-shadow: none;
+}
+.leaflet-container .leaflet-popup .leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 1rem;
+}
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button {
+  color: #fff;
+}
+
+@layer utilities {
+  input[type='search']::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+  [contenteditable][data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+  .toggle-elevate::before,
+  .toggle-elevate-2::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: -1;
+  }
+  .toggle-elevate.toggle-elevated::before {
+    background-color: var(--elevate-2);
+  }
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0px;
+    border-radius: inherit;
+    z-index: 999;
+  }
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
+    inset: -1px;
+  }
+}

@@ -1,0 +1,139 @@
+DOC-03 — API unit test results
+Run started (UTC): 2026-09-14T10:18:25.353Z
+Node: v24.13.0; Vitest 3.2.7
+Command: pnpm --filter @workspace/api-server exec vitest run --reporter=json --outputFile=/tmp/doc03/api-results.json
+Exit code: 0
+Files: 11; tests: 97; passed: 97; failed: 0; pending: 0
+Scope: local unit tests; Firebase transport/auth are mocked, not production or phone evidence.
+Format: normalized from the Vitest JSON report; test names, statuses, durations retained. Console request/error dumps excluded.
+
+artifacts/api-server/src/lib/audit.test.ts — passed (3 tests)
+Source SHA-256: d554301dcd50707a7126b228170de611f6b46b9a726d59c0fc48416136ceac37
+  PASSED audit text bounds keeps short text as-is (1.00 ms)
+  PASSED audit text bounds never exceeds the Rules limit even for maximum-length user fields (0.17 ms)
+  PASSED audit text bounds never sends an empty summary (no-op membership PATCH) (0.18 ms)
+
+artifacts/api-server/src/lib/tracking.test.ts — passed (15 tests)
+Source SHA-256: 560308f4a7e537e05069434ce414fd4d862a576a9fe21459f97f5d755dbad4ab
+  PASSED reliable tracking state machine serializes concurrent starts and returns the original attempt on retry (4.63 ms)
+  PASSED reliable tracking state machine returns an exact active retry even after the start deadline (1.19 ms)
+  PASSED reliable tracking state machine rejects old generations, repeated sequences, and older captures (2.88 ms)
+  PASSED reliable tracking state machine keeps the last valid fix when a weak report arrives (1.12 ms)
+  PASSED reliable tracking state machine allows an unavailable heartbeat with the next sequence and preserves GPS history (1.26 ms)
+  PASSED reliable tracking state machine carries direction and the bus-full flag while active and drops full at End (2.05 ms)
+  PASSED reliable tracking state machine ages a weak report despite a healthy heartbeat (0.80 ms)
+  PASSED reliable tracking state machine rejects stale and materially future captures (0.79 ms)
+  PASSED reliable tracking state machine allows an explicit takeover only after the heartbeat lease expires (1.20 ms)
+  PASSED reliable tracking state machine cancels an expired pending End behind a healthy preceding owner (0.96 ms)
+  PASSED reliable tracking state machine ends atomically, cancels a delayed start, and never exposes private ownership (1.97 ms)
+  PASSED reliable tracking state machine writes an End tombstone before acknowledging a not-yet-created trip (0.70 ms)
+  PASSED reliable tracking state machine force-ends an active trip and is idempotent for an ended trip (1.11 ms)
+  PASSED reliable tracking state machine reports NOT_STARTED when an admin force-ends an absent bus (0.17 ms)
+  PASSED feed DTO hides coordinates for offline feeds and keeps the DTO sanitized (0.22 ms)
+
+artifacts/api-server/src/middleware/rate-limit.test.ts — passed (5 tests)
+Source SHA-256: 2a79dff098d997c770333e08ae6c2a96f29d5f4fa57362af49e0e16f1e7af748
+  PASSED Rate limits (SEC-01) lets a bus report about once a second, then answers 429 with Retry-After until the minute ends (543.95 ms)
+  PASSED Rate limits (SEC-01) caps membership creation per account and refuses before any database read (44.58 ms)
+  PASSED Rate limits (SEC-01) caps one client across accounts: 12 fresh accounts spend the membership client budget, the 13th is refused (517.43 ms)
+  PASSED Rate limits (SEC-01) limits route writes per admin: the 31st in a minute is refused even when the route does not exist (197.70 ms)
+  PASSED Rate limits (SEC-01) does not count unauthenticated requests: those stop at 401 (303.05 ms)
+
+artifacts/api-server/src/routes/assignments.test.ts — passed (7 tests)
+Source SHA-256: be82307572ef3c031b621939c50ff3b88bc08c36b6fb56b299ba02798e2f9afc
+  PASSED Dated assignments (ASG-01) computes IST service days: date from an instant, midnight bounds, impossible dates refused (7.50 ms)
+  PASSED Dated assignments (ASG-01) requires an admin token (61.06 ms)
+  PASSED Dated assignments (ASG-01) saves under a date_shift_bus key with the route's shift and version, then lists it (51.95 ms)
+  PASSED Dated assignments (ASG-01) refuses bad references with a reason: past date, non-driver, parked bus, route of another bus (31.36 ms)
+  PASSED Dated assignments (ASG-01) rejects conflicts before persisting and names the other driver or bus (21.00 ms)
+  PASSED Dated assignments (ASG-01) admits Start on the override bus for today only, pins the assignment id, and keeps the standing bus (31.32 ms)
+  PASSED Dated assignments (ASG-01) removes an assignment unless a live trip runs under it (24.15 ms)
+
+artifacts/api-server/src/routes/buses.test.ts — passed (16 tests)
+Source SHA-256: 1ea70ce60256fe50b9d2575af3c931e15b47ddae74050ac3d66c77be71a226a7
+  PASSED Bus registry (FLT-01/FLT-02) requires a Firebase token on every registry route (72.40 ms)
+  PASSED Bus registry (FLT-01/FLT-02) registers under the normalized key and names the existing record on a duplicate (73.91 ms)
+  PASSED Bus registry (FLT-01/FLT-02) lists active buses for members and every bus for admins (48.12 ms)
+  PASSED Bus registry (FLT-01/FLT-02) refuses to deactivate a bus with a live trip and explains why (11.09 ms)
+  PASSED Bus registry (FLT-01/FLT-02) deactivates an idle bus with an audit row, keeps its routes stored and hides them from students (21.61 ms)
+  PASSED Bus registry (FLT-01/FLT-02) only assigns registered, in-service buses and stores the canonical key (23.02 ms)
+  PASSED Bus registry (FLT-01/FLT-02) only saves routes for registered buses and stores the canonical key (25.97 ms)
+  PASSED Bus registry (FLT-01/FLT-02) denies Start on a parked or unregistered bus and tells the driver why (FLT-03) (24.06 ms)
+  PASSED Bus registry (FLT-01/FLT-02) does not read the registry for suspended drivers (Rules would refuse) so /auth/me still reports the membership (6.54 ms)
+  PASSED Route publishing (RTE-01) refuses to publish without a verified path or the manual acknowledgement, but keeps drafts admin-only (27.08 ms)
+  PASSED Route publishing (RTE-01) checks an ors path against every stop before accepting it, on drafts too (33.10 ms)
+  PASSED Route publishing (RTE-01) imports legacy PostgreSQL routes as drafts and leaves existing records alone (12.10 ms)
+  PASSED Route publishing (RTE-01) reads records saved before RTE-01 as published and unverified (8.77 ms)
+  PASSED Route versions and publishing (RTE-02) publishes numbered snapshots, parks edits of a published route as a draft riders never see, and serves old versions (217.86 ms)
+  PASSED Route versions and publishing (RTE-02) pins the bus's published versions at Start and keeps them through a republish; only unversioned routes still lock (AC-19) (117.15 ms)
+  PASSED Route versions and publishing (RTE-02) creates under a client-chosen id once and lands a retried save on the same route, while an edit of a gone route still 404s (RTE-04, AC-21) (86.21 ms)
+
+artifacts/api-server/src/routes/geo.test.ts — passed (12 tests)
+Source SHA-256: 633839ae04c2041d3ac589428b4aef4f73d25b7ddff82167832fea6f3cc15760
+  PASSED Geo API OpenRouteService boundary geocodes with the Vadodara bias and never puts the key in the URL (61.76 ms)
+  PASSED Geo API OpenRouteService boundary returns null for an empty geocoder result and rejects outside bounds (25.76 ms)
+  PASSED Geo API OpenRouteService boundary returns the complete directions path in lat/lng order (10.92 ms)
+  PASSED Geo API OpenRouteService boundary denies anonymous, unverified, non-admin, pending, suspended, inactive, expired, and mismatched callers before ORS (174.34 ms)
+  PASSED Geo API OpenRouteService boundary returns an explicit error when ORS is not configured (6.26 ms)
+  PASSED Geo API OpenRouteService boundary rejects invalid and unknown request fields before ORS (58.95 ms)
+  PASSED Geo API OpenRouteService boundary rate limits an authenticated caller without truncating provider traffic (244.12 ms)
+  PASSED Geo API OpenRouteService boundary maps provider auth and server failures to controlled provider errors (23.49 ms)
+  PASSED Geo API OpenRouteService boundary rejects malformed, empty, and invalid provider geometry (40.21 ms)
+  PASSED Geo API OpenRouteService boundary bounds chunked provider responses without a content-length header (11.95 ms)
+  PASSED Geo API OpenRouteService boundary handles network and timeout failures without exposing provider details (5.27 ms)
+  PASSED Geo API OpenRouteService boundary starts the end-to-end timeout before the provider fetch settles (12007.87 ms)
+
+artifacts/api-server/src/routes/handover.test.ts — passed (7 tests)
+Source SHA-256: bf50dec516ce6bd3be0c1d23ace6536f091de9c85fe4625ac33f6d2a375bbb8b
+  PASSED Handover (ADM-10) is admin-only (89.46 ms)
+  PASSED Handover (ADM-10) ends the current publisher, authorizes the relief driver for today and writes one audit naming both (97.59 ms)
+  PASSED Handover (ADM-10) needs no assignment when the bus is already the next driver's standing bus (16.35 ms)
+  PASSED Handover (ADM-10) still authorizes the next driver when the trip ended in between, and reports it (6.71 ms)
+  PASSED Handover (ADM-10) refuses when the bus changed hands between the admin's look and the confirmation (12.81 ms)
+  PASSED Handover (ADM-10) refuses without changing anything: same driver, missing route, ineligible driver, wrong route, conflict, unknown bus (53.30 ms)
+  PASSED Handover (ADM-10) overrides whoever the bus was booked for, so handovers can chain, but still refuses a driver booked elsewhere (42.52 ms)
+
+artifacts/api-server/src/routes/membership-expiry.test.ts — passed (5 tests)
+Source SHA-256: e12c52f73f384350dc42f2b5ef95646cb96c3a46d4469b8d170a8c3d165d592b
+  PASSED Membership expiry (IDN-01 / AUTH-02) refuses protected reads with a distinct code once expiresAt has passed, while a future expiry still admits (68.07 ms)
+  PASSED Membership expiry (IDN-01 / AUTH-02) /auth/me still returns the record (with expiresAt) so the client can show 'expired', but no driver preflight data (30.62 ms)
+  PASSED Membership expiry (IDN-01 / AUTH-02) lets an admin set, extend and clear the expiry, audited as dates; the record keeps its other fields (49.20 ms)
+  PASSED Membership expiry (IDN-01 / AUTH-02) rejects malformed expiries and an admin expiring themself; a future self-expiry is allowed (60.75 ms)
+  PASSED Membership expiry (IDN-01 / AUTH-02) treats an expired driver as ineligible for assignments and an expired admin as no admin (10.05 ms)
+
+artifacts/api-server/src/routes/request-bounds.test.ts — passed (6 tests)
+Source SHA-256: a2dad940e40c3d0c6277914e6b836ff627bc956b5dba952b49c5135c7529ee1d
+  PASSED Request bounds (SEC-02) refuses a body over 32 kB with 413 before authentication or any database call (37.93 ms)
+  PASSED Request bounds (SEC-02) refuses malformed JSON with 400 (21.83 ms)
+  PASSED Request bounds (SEC-02) carries a 5000-point road path, but the 5001st point, the 501st stop or a 201-character field is refused with 400 and nothing written (121.75 ms)
+  PASSED Request bounds (SEC-02) refuses a route body over 512 kB with 413 before validation (13.89 ms)
+  PASSED Request bounds (SEC-02) refuses a driver uid that is not a plain database key, in assignment bodies, handover bodies and paths, before any write (99.43 ms)
+  PASSED Request bounds (SEC-02) refuses membership fields over their bounds with 400 and leaves the record untouched (47.22 ms)
+
+artifacts/api-server/src/routes/service-calendar.test.ts — passed (2 tests)
+Source SHA-256: 3cd65196d44cf06388ff0fb2180ba1e63b801410e787121dd3ec0c20bbdc724a
+  PASSED Service calendar (STU-04b) admin marks, re-marks and clears a day; members read it earliest first; every change is audited (111.22 ms)
+  PASSED Service calendar (STU-04b) refuses bad dates, wrong flags, long notes and non-admins (28.75 ms)
+
+artifacts/api-server/src/routes/transit.test.ts — passed (19 tests)
+Source SHA-256: dec21f916fea370764553e7a8e26978e728b57d5f69f964cd0f0e48f1bc55f11
+  PASSED Transit API Firebase boundaries does not expose routes without a Firebase token (21.15 ms)
+  PASSED Transit API Firebase boundaries does not invoke error middleware for an unmatched URL (4.71 ms)
+  PASSED Transit API Firebase boundaries returns a structured client error for malformed JSON (11.58 ms)
+  PASSED Transit API Firebase boundaries protects both tracking reads without a Firebase token (12.55 ms)
+  PASSED Transit API Firebase boundaries protects audit and force-end without a Firebase token (10.46 ms)
+  PASSED Transit API Firebase boundaries rejects audit access and force-end for a non-admin member (24.78 ms)
+  PASSED Transit API Firebase boundaries validates the audit list limit for an admin (5.89 ms)
+  PASSED Transit API Firebase boundaries force-ends an active trip and appends its audit record (8.72 ms)
+  PASSED Transit API Firebase boundaries never authorizes the removed shared password (3.53 ms)
+  PASSED Transit API Firebase boundaries returns an unverified university user without reading RTDB (4.43 ms)
+  PASSED Transit API Firebase boundaries reports the grace deadline for a personal-email student and syncs a new university email (9.71 ms)
+  PASSED Transit API Firebase boundaries blocks a personal-email student whose grace period has ended (7.55 ms)
+  PASSED Transit API Firebase boundaries does not let a verified personal token use a stored-university admin membership (3.71 ms)
+  PASSED Transit API Firebase boundaries denies a changed or unverified email the stored approval, and rebinds only a verified university email (22.79 ms)
+  PASSED Transit API Firebase boundaries refuses staff, driver, and admin sign-ups from a personal email (19.87 ms)
+  PASSED Transit API Firebase boundaries validates, filters, audits, and protects notices (20.79 ms)
+  PASSED Transit API Firebase boundaries stores a driver sign-up as an approved student with a role request (2.90 ms)
+  PASSED Transit API Firebase boundaries keeps the root administrator out of other administrators' hands (10.02 ms)
+  PASSED Transit API Firebase boundaries forwards the Firebase token to RTDB for a membership request (4.61 ms)
+

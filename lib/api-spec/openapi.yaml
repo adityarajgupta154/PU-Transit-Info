@@ -1,0 +1,2104 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: PU Transit API
+servers:
+  - url: /api
+    description: Base API path
+security:
+  - FirebaseBearer: []
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Firebase authentication and membership
+  - name: memberships
+    description: Administrator membership management
+  - name: routes
+    description: Transit route management
+  - name: tracking
+    description: Reliable bus tracking
+  - name: audit
+    description: Administrator audit log
+  - name: notices
+    description: Service notices for members
+  - name: calendar
+    description: Admin-managed service calendar (no-service days, STU-04b)
+  - name: buses
+    description: Bus registry (canonical registration keys)
+  - name: assignments
+    description: Dated driver-bus-route assignments overriding the standing bus (ASG-01)
+  - name: migration
+    description: Explicit PostgreSQL migration operations
+  - name: geo
+    description: Vadodara geocoding and driving directions
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/me:
+    get:
+      operationId: getAuthMe
+      tags: [auth]
+      summary: Get the authenticated Firebase user and membership
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMe"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /auth/membership:
+    post:
+      operationId: createMembership
+      tags: [auth]
+      summary: Create the authenticated user's approved student or staff membership, optionally requesting the driver or admin role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipInput"
+      responses:
+        "200":
+          description: Existing membership
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "201":
+          description: Created membership
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /memberships:
+    get:
+      operationId: listMemberships
+      tags: [memberships]
+      summary: List all memberships
+      responses:
+        "200":
+          description: Memberships
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /memberships/{uid}:
+    patch:
+      operationId: updateMembership
+      tags: [memberships]
+      summary: Update a membership
+      parameters:
+        - $ref: "#/components/parameters/Uid"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipUpdate"
+      responses:
+        "200":
+          description: Updated membership
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /routes:
+    get:
+      operationId: listRoutes
+      tags: [routes]
+      summary: List routes
+      responses:
+        "200":
+          description: Routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Route"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      operationId: saveRoute
+      tags: [routes]
+      summary: Create or update a route
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteInput"
+      responses:
+        "200":
+          description: Updated route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "201":
+          description: Created route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /routes/{id}:
+    put:
+      operationId: putRoute
+      tags: [routes]
+      summary: Create or replace a route under a client-chosen UUID (RTE-04) — idempotent, so a save whose response was lost can be retried without creating a second route; non-UUID ids are 400
+      parameters:
+        - $ref: "#/components/parameters/RouteId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteInput"
+      responses:
+        "200":
+          description: Replaced route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "201":
+          description: Created route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    patch:
+      operationId: updateRoute
+      tags: [routes]
+      summary: Update a route by ID
+      parameters:
+        - $ref: "#/components/parameters/RouteId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteInput"
+      responses:
+        "200":
+          description: Updated route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    delete:
+      operationId: deleteRoute
+      tags: [routes]
+      summary: Permanently delete a never-published draft (RTE-03); published routes are archived instead (409 ROUTE_PUBLISHED)
+      parameters:
+        - $ref: "#/components/parameters/RouteId"
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /routes/{id}/archive:
+    post:
+      operationId: archiveRoute
+      tags: [routes]
+      summary: Archive a published route (RTE-03) — hidden from riders, versions kept; refused while its bus has a live trip (409 ROUTE_LOCKED_ACTIVE_TRIP) or for drafts (409 ROUTE_NOT_PUBLISHED). Publishing again restores it.
+      parameters:
+        - $ref: "#/components/parameters/RouteId"
+      responses:
+        "200":
+          description: Archived route
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Route"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /routes/{id}/versions/{n}:
+    get:
+      operationId: getRouteVersion
+      tags: [routes]
+      summary: Read one immutable published version of a route (RTE-02); trips pin the version they started with
+      parameters:
+        - $ref: "#/components/parameters/RouteId"
+        - $ref: "#/components/parameters/RouteVersionNumber"
+      responses:
+        "200":
+          description: Route version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteVersion"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking:
+    get:
+      operationId: listTrackingFeeds
+      tags: [tracking]
+      summary: List current tracking feeds for administrators
+      responses:
+        "200":
+          description: Tracking feeds keyed by bus ID
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: "#/components/schemas/LiveTrackingFeed"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}:
+    get:
+      operationId: getTrackingFeed
+      tags: [tracking]
+      summary: Get a sanitized tracking feed
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      responses:
+        "200":
+          description: Sanitized tracking feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveTrackingFeed"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/start:
+    post:
+      operationId: startTracking
+      tags: [tracking]
+      summary: Start or retry a tracking trip
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripStartInput"
+      responses:
+        "200":
+          description: Idempotent active retry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripSession"
+        "201":
+          description: Started tracking trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/sample:
+    post:
+      operationId: submitTrackingSample
+      tags: [tracking]
+      summary: Publish a GPS sample for the current trip
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripSampleInput"
+      responses:
+        "200":
+          description: Updated tracking trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/heartbeat:
+    post:
+      operationId: sendTrackingHeartbeat
+      tags: [tracking]
+      summary: Refresh the current tracking lease
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripHeartbeatInput"
+      responses:
+        "200":
+          description: Updated tracking trip
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripSession"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/end:
+    post:
+      operationId: endTracking
+      tags: [tracking]
+      summary: End or cancel a tracking trip
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TripEndInput"
+      responses:
+        "200":
+          description: End result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TripEndResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/force-end:
+    post:
+      operationId: forceEndTracking
+      tags: [tracking]
+      summary: Force-end the current trip as an administrator
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForceEndRequest"
+      responses:
+        "200":
+          description: Force-end result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForceEndResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "502":
+          $ref: "#/components/responses/ServiceUnavailable"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /tracking/{busId}/handover:
+    post:
+      operationId: handoverTracking
+      tags: [tracking]
+      summary: Hand the bus to another driver in one confirmed action (ADM-10)
+      description: Force-ends the current publisher and pre-authorizes the named driver's Start for today (IST) — through their standing bus, or a dated assignment on the given route — and writes one audit record naming both drivers. The previous phone drops to idle on its next upload (409 SESSION_CONFLICT).
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HandoverRequest"
+      responses:
+        "200":
+          description: Handover result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HandoverResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "502":
+          $ref: "#/components/responses/ServiceUnavailable"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /notices:
+    get:
+      operationId: listNotices
+      tags: [notices]
+      summary: List notices that have not expired
+      responses:
+        "200":
+          description: Active notices, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notice"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      operationId: createNotice
+      tags: [notices]
+      summary: Post a notice for one route or all routes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NoticeInput"
+      responses:
+        "201":
+          description: Created notice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notice"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /notices/{id}:
+    delete:
+      operationId: deleteNotice
+      tags: [notices]
+      summary: Remove a notice
+      parameters:
+        - $ref: "#/components/parameters/NoticeId"
+      responses:
+        "204":
+          description: Notice removed
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /service-calendar:
+    get:
+      operationId: listServiceCalendar
+      tags: [calendar]
+      summary: List every no-service day, earliest first
+      description: A day is "no service" only when an admin marked it; without an entry clients keep showing the normal states and never guess.
+      responses:
+        "200":
+          description: No-service days
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ServiceDay"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /service-calendar/{date}:
+    put:
+      operationId: setServiceDay
+      tags: [calendar]
+      summary: Mark an IST date as a no-service day (idempotent; replaces the note)
+      parameters:
+        - $ref: "#/components/parameters/ServiceDate"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceDayInput"
+      responses:
+        "200":
+          description: The saved day
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceDay"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    delete:
+      operationId: deleteServiceDay
+      tags: [calendar]
+      summary: Remove a no-service day
+      parameters:
+        - $ref: "#/components/parameters/ServiceDate"
+      responses:
+        "204":
+          description: Day removed
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /buses:
+    get:
+      operationId: listBuses
+      tags: [buses]
+      summary: List registered buses (members see active buses only)
+      responses:
+        "200":
+          description: Buses sorted by key
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Bus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      operationId: createBus
+      tags: [buses]
+      summary: Register a bus under its normalized registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusInput"
+      responses:
+        "201":
+          description: Registered bus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bus"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: The registration already exists (BUS_EXISTS names the record)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /buses/{busId}:
+    patch:
+      operationId: updateBus
+      tags: [buses]
+      summary: Rename, deactivate or reactivate a bus
+      parameters:
+        - $ref: "#/components/parameters/BusId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusUpdate"
+      responses:
+        "200":
+          description: Updated bus
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Bus"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: The bus has a live trip (BUS_ACTIVE_TRIP); end it first
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /assignments:
+    get:
+      operationId: listAssignments
+      tags: [assignments]
+      summary: List dated assignments, soonest first (admin)
+      responses:
+        "200":
+          description: Assignments sorted by service date, shift and bus
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+    post:
+      operationId: createAssignment
+      tags: [assignments]
+      summary: Put a driver on a bus and its published route for one service date (ASG-01); overrides the standing bus for that date and shift
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignmentInput"
+      responses:
+        "201":
+          description: Saved assignment (the same driver, bus, date and shift overwrites its route)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: ASSIGNMENT_CONFLICT names the other driver or bus for that date and shift; DRIVER_NOT_ELIGIBLE, BUS_NOT_REGISTERED, BUS_OUT_OF_SERVICE or ROUTE_NOT_FOR_BUS explain a refused reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /assignments/{driverUid}/{assignmentId}:
+    delete:
+      operationId: deleteAssignment
+      tags: [assignments]
+      summary: Remove a dated assignment (admin); refused while a live trip runs under it (409 ASSIGNMENT_IN_USE)
+      parameters:
+        - name: driverUid
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
+        - name: assignmentId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}-\\d{2}_[a-z0-9]{1,40}_[A-Z0-9]{2,20}$"
+      responses:
+        "204":
+          description: Removed (or already absent)
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /audit:
+    get:
+      operationId: listAudit
+      tags: [audit]
+      summary: List audit entries newest first
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        "200":
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /migration/preview:
+    get:
+      operationId: previewMigration
+      tags: [migration]
+      summary: Preview legacy PostgreSQL data
+      responses:
+        "200":
+          description: Legacy row counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationPreview"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /migration/import:
+    post:
+      operationId: importMigration
+      tags: [migration]
+      summary: Import valid legacy PostgreSQL routes without overwriting Firebase
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmptyInput"
+      responses:
+        "200":
+          description: Import counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationImport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /geo/geocode:
+    post:
+      operationId: geocodePlace
+      tags: [geo]
+      summary: Suggest Vadodara places for a partial query through OpenRouteService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeoGeocodeInput"
+      responses:
+        "200":
+          description: Matching places inside Vadodara, best match first (empty when nothing matches)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeoGeocodeResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/ProviderFailure"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /geo/directions:
+    post:
+      operationId: getGeoDirections
+      tags: [geo]
+      summary: Get Vadodara driving directions through OpenRouteService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeoDirectionsInput"
+      responses:
+        "200":
+          description: Ordered road path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeoDirectionsResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "502":
+          $ref: "#/components/responses/ProviderFailure"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /auth/login:
+    post:
+      operationId: legacyLogin
+      tags: [auth]
+      deprecated: true
+      summary: Disabled legacy password login
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LegacyLoginInput"
+      responses:
+        "401":
+          $ref: "#/components/responses/LegacyDisabled"
+  /auth/logout:
+    post:
+      operationId: legacyLogout
+      tags: [auth]
+      deprecated: true
+      summary: Disabled legacy logout
+      security: []
+      responses:
+        "204":
+          description: No session was created
+  /auth/session:
+    get:
+      operationId: legacySession
+      tags: [auth]
+      deprecated: true
+      summary: Disabled legacy session
+      security: []
+      responses:
+        "401":
+          $ref: "#/components/responses/LegacyDisabled"
+components:
+  securitySchemes:
+    FirebaseBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Uid:
+      name: uid
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    RouteId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    RouteVersionNumber:
+      name: n
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+    NoticeId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    ServiceDate:
+      name: date
+      in: path
+      required: true
+      description: IST calendar date, yyyy-mm-dd
+      schema:
+        type: string
+        pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+    BusId:
+      name: busId
+      in: path
+      required: true
+      description: Canonical bus key (registration uppercased, letters and digits only)
+      schema:
+        type: string
+        pattern: "^[A-Z0-9]{2,20}$"
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: Tracking ownership or replay conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing or invalid Firebase JWT
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Firebase email, membership, role, or assignment is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ServiceUnavailable:
+      description: Firebase or migration service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    TooManyRequests:
+      description: Request rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ProviderFailure:
+      description: OpenRouteService failed or returned an invalid response
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    LegacyDisabled:
+      description: Legacy password sessions are disabled
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+    MemberRole:
+      type: string
+      enum: [student, staff, driver, admin]
+    RequestedRole:
+      type: string
+      enum: [driver, admin]
+    Member:
+      type: object
+      additionalProperties: false
+      required: [uid, email, role, status, active, assignedBusId, requestedRole, expiresAt, root, createdAt, updatedAt]
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        status:
+          type: string
+          enum: [pending, approved, rejected, suspended]
+        active:
+          type: boolean
+        assignedBusId:
+          type: string
+        requestedRole:
+          description: Role the member asked for at sign-up; cleared when an admin grants or dismisses it
+          oneOf:
+            - $ref: "#/components/schemas/RequestedRole"
+            - type: "null"
+        expiresAt:
+          description: IDN-01 — UTC ms after which Rules and the API refuse protected access even though status/active are unchanged; null means no expiry
+          oneOf:
+            - type: integer
+              format: int64
+            - type: "null"
+        root:
+          description: True for the owner account, which no other admin can change
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+        updatedAt:
+          type: integer
+          format: int64
+    AuthMe:
+      type: object
+      additionalProperties: false
+      required: [uid, email, emailVerified, universityEmail, graceEndsAt, membership, bus, assignments]
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+          format: email
+        emailVerified:
+          type: boolean
+        universityEmail:
+          description: Whether the signed-in email belongs to the university domain
+          type: boolean
+        graceEndsAt:
+          description: When a personal-email student loses access unless they switch to a university email; null for university emails or without a membership
+          type: ["integer", "null"]
+          format: int64
+        membership:
+          oneOf:
+            - $ref: "#/components/schemas/Member"
+            - type: "null"
+        bus:
+          description: The registry record of the driver's assigned bus (any status, so a parked bus can explain itself in preflight); null for non-drivers, without an assignment, or when the assigned id is not registered
+          oneOf:
+            - $ref: "#/components/schemas/Bus"
+            - type: "null"
+        assignments:
+          description: ASG-01 - the driver's dated assignments for today (Asia/Kolkata), soonest shift first; empty for non-drivers and for accounts that cannot start a trip
+          type: array
+          items:
+            $ref: "#/components/schemas/DriverAssignment"
+    MembershipInput:
+      type: object
+      additionalProperties: false
+      required: [role]
+      properties:
+        role:
+          description: Role chosen at sign-up; driver and admin are stored as a request on a student record
+          type: string
+          enum: [student, staff, driver, admin]
+    MembershipUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        role:
+          $ref: "#/components/schemas/MemberRole"
+        status:
+          type: string
+          enum: [pending, approved, rejected, suspended]
+        active:
+          type: boolean
+        assignedBusId:
+          type: string
+          maxLength: 128
+        requestedRole:
+          description: Only null is accepted, to dismiss a pending role request
+          type: "null"
+        expiresAt:
+          description: IDN-01 — set or extend the access end (UTC ms, must be positive); null clears it. An admin cannot give themself a past expiry.
+          oneOf:
+            - type: integer
+              format: int64
+              minimum: 1
+              maximum: 8640000000000000
+            - type: "null"
+    RouteStop:
+      type: object
+      additionalProperties: false
+      required: [lat, lng]
+      properties:
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+        name:
+          type: string
+          maxLength: 200
+    Coordinate:
+      type: object
+      additionalProperties: false
+      required: [lat, lng]
+      properties:
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+    GeoPoint:
+      type: object
+      additionalProperties: false
+      required: [lat, lng]
+      properties:
+        lat:
+          type: number
+          minimum: 22.15
+          maximum: 22.45
+        lng:
+          type: number
+          minimum: 72.95
+          maximum: 73.40
+    GeoGeocodeInput:
+      type: object
+      additionalProperties: false
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 200
+    GeoPlace:
+      type: object
+      additionalProperties: false
+      required: [name, detail, lat, lng]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        detail:
+          type: string
+          maxLength: 120
+          description: The area that tells same-named places apart; empty when there is none.
+        lat:
+          type: number
+          minimum: 22.15
+          maximum: 22.45
+        lng:
+          type: number
+          minimum: 72.95
+          maximum: 73.40
+    GeoGeocodeResult:
+      type: object
+      additionalProperties: false
+      required: [places]
+      properties:
+        places:
+          type: array
+          maxItems: 8
+          items:
+            $ref: "#/components/schemas/GeoPlace"
+    GeoDirectionsInput:
+      type: object
+      additionalProperties: false
+      required: [start, end]
+      properties:
+        start:
+          $ref: "#/components/schemas/GeoPoint"
+        end:
+          $ref: "#/components/schemas/GeoPoint"
+        via:
+          description: Intermediate stops in travel order, so the road path covers every leg (RTE-01)
+          type: array
+          maxItems: 48
+          items:
+            $ref: "#/components/schemas/GeoPoint"
+    GeoDirectionsResult:
+      type: object
+      additionalProperties: false
+      required: [path]
+      properties:
+        path:
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items:
+            $ref: "#/components/schemas/GeoPoint"
+    Route:
+      type: object
+      additionalProperties: false
+      required: [id, shift, busNumber, origin, destination, stops, status]
+      properties:
+        id:
+          type: string
+        status:
+          $ref: "#/components/schemas/RouteStatus"
+        publishedVersion:
+          description: Number of the version riders currently see (RTE-02); absent until the route is first published under versioning
+          type: integer
+          minimum: 1
+        hasDraft:
+          description: Admin lists only — the returned content is an unpublished draft; riders still see publishedVersion
+          type: boolean
+        pathSource:
+          $ref: "#/components/schemas/RoutePathSource"
+        shift:
+          type: string
+        busNumber:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        stops:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/RouteStop"
+        pathData:
+          type: array
+          maxItems: 5000
+          items:
+            $ref: "#/components/schemas/Coordinate"
+        kind:
+          $ref: "#/components/schemas/RouteKind"
+    RouteKind:
+      description: Regular city bus or a campus shuttle; absent means bus
+      type: string
+      enum: [bus, shuttle]
+    RouteStatus:
+      description: Drafts are visible to admins only; publishing requires a verified path or the manual-path acknowledgement (RTE-01). Records saved before this field existed read as published. Archived routes are hidden from riders and kept for history (RTE-03 adds the action; only draft and published are accepted as input).
+      type: string
+      enum: [draft, published, archived]
+    RouteVersion:
+      description: Immutable snapshot written when a route is published (RTE-02)
+      type: object
+      additionalProperties: false
+      required: [n, shift, busNumber, origin, destination, stops, createdAt, createdBy]
+      properties:
+        n:
+          type: integer
+          minimum: 1
+        shift:
+          type: string
+        busNumber:
+          type: string
+        origin:
+          type: string
+        destination:
+          type: string
+        stops:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/RouteStop"
+        pathData:
+          type: array
+          maxItems: 5000
+          items:
+            $ref: "#/components/schemas/Coordinate"
+        kind:
+          $ref: "#/components/schemas/RouteKind"
+        pathSource:
+          $ref: "#/components/schemas/RoutePathSource"
+        createdAt:
+          type: integer
+        createdBy:
+          type: string
+    RoutePathSource:
+      description: How the drawn path was produced. ors = road geometry from the directions provider through every stop (verified by the API to pass within 150 m of each stop); manual = an admin acknowledged the path is not road-verified and students see "path not verified". Absent = unverified, publishable only as a draft.
+      type: string
+      enum: [ors, manual]
+    RouteInput:
+      type: object
+      additionalProperties: false
+      required: [shift, busNumber, origin, destination, stops, status]
+      properties:
+        id:
+          type: string
+          maxLength: 128
+        status:
+          description: The action - draft or published. Archiving is its own endpoint (RTE-03).
+          type: string
+          enum: [draft, published]
+        pathSource:
+          $ref: "#/components/schemas/RoutePathSource"
+        shift:
+          type: string
+          minLength: 1
+          maxLength: 200
+        busNumber:
+          type: string
+          minLength: 1
+          maxLength: 200
+        origin:
+          type: string
+          minLength: 1
+          maxLength: 200
+        destination:
+          type: string
+          minLength: 1
+          maxLength: 200
+        stops:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/RouteStop"
+        pathData:
+          type: array
+          maxItems: 5000
+          items:
+            $ref: "#/components/schemas/Coordinate"
+        kind:
+          $ref: "#/components/schemas/RouteKind"
+    TripDirection:
+      description: Which way the bus is travelling on this trip
+      type: string
+      enum: [toCampus, fromCampus]
+    LiveTrackingFeed:
+      type: object
+      additionalProperties: false
+      required:
+        - protocolVersion
+        - busId
+        - tripId
+        - generation
+        - phase
+        - requestedAt
+        - startedAt
+        - endedAt
+        - heartbeatAt
+        - gpsQuality
+        - lastReportCapturedAt
+        - lastReportReceivedAt
+        - reportedAccuracy
+        - lastValidCapturedAt
+        - lastValidReceivedAt
+        - location
+        - status
+        - serverTime
+        - freshUntil
+        - offlineAfter
+        - direction
+        - full
+      properties:
+        protocolVersion:
+          type: integer
+          enum: [2]
+        direction:
+          oneOf:
+            - $ref: "#/components/schemas/TripDirection"
+            - type: "null"
+        full:
+          description: Driver reports the bus has no free seats; false when the trip is not active
+          type: boolean
+        routeVersions:
+          description: Route version pinned at Start for each published route of this bus (RTE-02); riders keep it until the trip ends. Empty for legacy routes and idle buses.
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 1
+        busId:
+          type: string
+        tripId:
+          type: ["string", "null"]
+          format: uuid
+        generation:
+          type: integer
+          minimum: 0
+        phase:
+          type: string
+          enum: [not_started, active, ended]
+        requestedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        startedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        endedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        heartbeatAt:
+          type: integer
+          format: int64
+          minimum: 0
+        gpsQuality:
+          type: string
+          enum: [acquiring, good, weak, unavailable]
+        lastReportCapturedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        lastReportReceivedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        reportedAccuracy:
+          type: number
+          minimum: 0
+        lastValidCapturedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        lastValidReceivedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        location:
+          type: ["object", "null"]
+          additionalProperties: false
+          required: [lat, lng, accuracy]
+          properties:
+            lat:
+              type: number
+              minimum: -90
+              maximum: 90
+            lng:
+              type: number
+              minimum: -180
+              maximum: 180
+            accuracy:
+              type: number
+              minimum: 0
+              maximum: 100
+        status:
+          type: string
+          enum: [not_started, acquiring, live, delayed, weak_gps, gps_unavailable, offline, ended]
+        serverTime:
+          type: integer
+          format: int64
+          minimum: 0
+        freshUntil:
+          type: integer
+          format: int64
+          minimum: 0
+        offlineAfter:
+          type: integer
+          format: int64
+          minimum: 0
+    TripStartInput:
+      type: object
+      additionalProperties: false
+      required: [tripId, publisherId, expectedGeneration, requestedAt]
+      properties:
+        tripId:
+          type: string
+          format: uuid
+        publisherId:
+          type: string
+          format: uuid
+        expectedGeneration:
+          type: integer
+          minimum: 0
+        requestedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        direction:
+          $ref: "#/components/schemas/TripDirection"
+    TripSampleInput:
+      type: object
+      additionalProperties: false
+      required: [tripId, publisherId, generation, sequence, capturedAt, lat, lng, accuracy]
+      properties:
+        tripId:
+          type: string
+          format: uuid
+        publisherId:
+          type: string
+          format: uuid
+        generation:
+          type: integer
+          minimum: 1
+        sequence:
+          type: integer
+          minimum: 1
+        capturedAt:
+          type: integer
+          format: int64
+          minimum: 0
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+        accuracy:
+          type: number
+          minimum: 0
+          maximum: 100000
+        full:
+          type: boolean
+    TripHeartbeatInput:
+      type: object
+      additionalProperties: false
+      required: [tripId, publisherId, generation, sequence]
+      properties:
+        tripId:
+          type: string
+          format: uuid
+        publisherId:
+          type: string
+          format: uuid
+        generation:
+          type: integer
+          minimum: 1
+        sequence:
+          type: integer
+          minimum: 0
+        gpsUnavailable:
+          type: boolean
+        full:
+          type: boolean
+    TripEndInput:
+      type: object
+      additionalProperties: false
+      required: [tripId, publisherId, generation, requestedAt]
+      properties:
+        tripId:
+          type: string
+          format: uuid
+        publisherId:
+          type: string
+          format: uuid
+        generation:
+          type: integer
+          minimum: 1
+        requestedAt:
+          type: integer
+          format: int64
+          minimum: 0
+    TripSession:
+      type: object
+      additionalProperties: false
+      required: [tripId, publisherId, generation, sequence, feed]
+      properties:
+        tripId:
+          type: string
+          format: uuid
+        publisherId:
+          type: string
+          format: uuid
+        generation:
+          type: integer
+          minimum: 1
+        sequence:
+          type: integer
+          minimum: 0
+        feed:
+          $ref: "#/components/schemas/LiveTrackingFeed"
+    TripEndResult:
+      type: object
+      additionalProperties: false
+      required: [acknowledged, outcome, feed]
+      properties:
+        acknowledged:
+          type: boolean
+        outcome:
+          type: string
+          enum: [ended, superseded, cancelled, pending]
+        feed:
+          $ref: "#/components/schemas/LiveTrackingFeed"
+    ForceEndRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: string
+          maxLength: 200
+    ForceEndResult:
+      type: object
+      additionalProperties: false
+      required: [outcome, feed, auditId]
+      properties:
+        outcome:
+          type: string
+          enum: [ended, already_ended]
+        feed:
+          $ref: "#/components/schemas/LiveTrackingFeed"
+        auditId:
+          oneOf:
+            - type: string
+            - type: "null"
+    HandoverRequest:
+      type: object
+      additionalProperties: false
+      required: [nextDriverUid]
+      properties:
+        nextDriverUid:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: "^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$"
+        routeId:
+          description: Required when the next driver's standing bus is another bus; a published route of this bus whose shift the dated assignment takes
+          type: string
+          format: uuid
+        reason:
+          type: string
+          maxLength: 200
+    HandoverResult:
+      type: object
+      additionalProperties: false
+      required: [outcome, feed, previousDriverUid, assignment, auditId]
+      properties:
+        outcome:
+          description: already_ended when the trip finished between the admin's look and the confirmation; the next driver is authorized either way
+          type: string
+          enum: [ended, already_ended]
+        feed:
+          $ref: "#/components/schemas/LiveTrackingFeed"
+        previousDriverUid:
+          type: string
+        assignment:
+          description: The dated assignment written for the next driver, or null when this is already their standing bus
+          oneOf:
+            - $ref: "#/components/schemas/Assignment"
+            - type: "null"
+        auditId:
+          type: string
+    AuditAction:
+      type: string
+      enum: [tracking.force_end, tracking.handover, membership.update, route.save, route.delete, route.archive, notice.save, notice.delete, bus.save, bus.deactivate, bus.reactivate, assignment.save, assignment.delete, calendar.save, calendar.delete]
+    Notice:
+      type: object
+      additionalProperties: false
+      required: [id, text, routeId, until, createdBy, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          minLength: 1
+          maxLength: 280
+        routeId:
+          description: Route the notice is about; empty string means every route
+          type: string
+        until:
+          description: Epoch milliseconds after which the notice disappears
+          type: integer
+          format: int64
+        createdBy:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+    NoticeInput:
+      type: object
+      additionalProperties: false
+      required: [text, routeId, until]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 280
+        routeId:
+          type: string
+          maxLength: 128
+        until:
+          type: integer
+          format: int64
+          minimum: 0
+    ServiceDay:
+      type: object
+      additionalProperties: false
+      required: [date, noService, updatedBy, updatedAt]
+      properties:
+        date:
+          description: IST calendar date, yyyy-mm-dd (also the node key)
+          type: string
+          pattern: '^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$'
+        noService:
+          type: boolean
+          enum: [true]
+        note:
+          description: Reason shown to riders, e.g. "Diwali holiday"
+          type: string
+          minLength: 1
+          maxLength: 140
+        updatedBy:
+          type: string
+        updatedAt:
+          type: integer
+          format: int64
+    ServiceDayInput:
+      type: object
+      additionalProperties: false
+      required: [noService]
+      properties:
+        noService:
+          type: boolean
+          enum: [true]
+        note:
+          type: string
+          maxLength: 140
+    AuditEntry:
+      type: object
+      additionalProperties: false
+      required: [id, at, actorUid, actorEmail, action, target, summary]
+      properties:
+        id:
+          type: string
+        at:
+          type: integer
+          format: int64
+        actorUid:
+          type: string
+        actorEmail:
+          type: string
+          format: email
+        action:
+          $ref: "#/components/schemas/AuditAction"
+        target:
+          type: string
+          minLength: 1
+          maxLength: 128
+        summary:
+          type: string
+          minLength: 1
+          maxLength: 300
+    AuditList:
+      type: object
+      additionalProperties: false
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditEntry"
+    BusStatus:
+      type: string
+      enum: [active, out_of_service]
+    Bus:
+      type: object
+      additionalProperties: false
+      required: [busId, label, status, reason, createdAt, updatedAt]
+      properties:
+        busId:
+          description: Canonical key - the registration uppercased with everything but A-Z and 0-9 removed
+          type: string
+          pattern: "^[A-Z0-9]{2,20}$"
+        label:
+          type: string
+          maxLength: 64
+        status:
+          $ref: "#/components/schemas/BusStatus"
+        reason:
+          description: Why the bus is out of service; empty while active
+          type: string
+          maxLength: 200
+        createdAt:
+          type: number
+        updatedAt:
+          type: number
+    BusInput:
+      type: object
+      additionalProperties: false
+      required: [registration]
+      properties:
+        registration:
+          description: Registration as written; the key is derived from it
+          type: string
+          minLength: 2
+          maxLength: 64
+        label:
+          type: string
+          maxLength: 64
+    BusUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 64
+        status:
+          $ref: "#/components/schemas/BusStatus"
+        reason:
+          type: string
+          maxLength: 200
+    Assignment:
+      description: A dated override of the standing bus (ASG-01); the key is serviceDate_shiftKey_busId under the driver
+      type: object
+      additionalProperties: false
+      required: [id, driverUid, driverEmail, busId, routeId, routeVersion, shift, serviceDate, startsAt, endsAt, createdAt, createdBy]
+      properties:
+        id:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}_[a-z0-9]{1,40}_[A-Z0-9]{2,20}$"
+        driverUid:
+          type: string
+        driverEmail:
+          description: Copied from the membership when saved, so conflict messages can name people
+          type: string
+        busId:
+          type: string
+          pattern: "^[A-Z0-9]{2,20}$"
+        routeId:
+          type: string
+          format: uuid
+        routeVersion:
+          description: The route's published version when the assignment was saved; informational, Start pins its own
+          type: ["integer", "null"]
+        shift:
+          description: The route's shift at save time
+          type: string
+        serviceDate:
+          description: Calendar date in Asia/Kolkata
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        startsAt:
+          description: IST midnight opening the service date, epoch milliseconds
+          type: number
+        endsAt:
+          description: startsAt + 24h
+          type: number
+        createdAt:
+          type: number
+        createdBy:
+          type: string
+    AssignmentInput:
+      type: object
+      additionalProperties: false
+      required: [driverUid, busId, routeId, serviceDate]
+      properties:
+        driverUid:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: "^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$"
+        busId:
+          description: Registration as written; normalized to the registry key
+          type: string
+          minLength: 2
+          maxLength: 64
+        routeId:
+          description: A published route of that bus; its shift becomes the assignment's shift
+          type: string
+          format: uuid
+        serviceDate:
+          description: Calendar date in Asia/Kolkata, today or later
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+    DriverAssignment:
+      description: One of the signed-in driver's assignments for today (IST) with the bus record for preflight
+      type: object
+      additionalProperties: false
+      required: [assignment, bus]
+      properties:
+        assignment:
+          $ref: "#/components/schemas/Assignment"
+        bus:
+          oneOf:
+            - $ref: "#/components/schemas/Bus"
+            - type: "null"
+    MigrationPreview:
+      type: object
+      additionalProperties: false
+      required: [routes]
+      properties:
+        routes:
+          type: integer
+          minimum: 0
+    MigrationImport:
+      type: object
+      additionalProperties: false
+      required: [importedRoutes, skippedRoutes]
+      properties:
+        importedRoutes:
+          description: Rows created in Firebase as drafts (RTE-01); an admin publishes each after plotting or acknowledging its path
+          type: integer
+          minimum: 0
+        skippedRoutes:
+          description: Rows that already existed in Firebase or failed route validation
+          type: integer
+          minimum: 0
+    EmptyInput:
+      type: object
+      additionalProperties: false
+      maxProperties: 0
+    LegacyLoginInput:
+      type: object
+      additionalProperties: false
+      properties:
+        password:
+          type: string

@@ -1,0 +1,38 @@
+{
+  "name": "@workspace/scripts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hello": "tsx ./src/hello.ts",
+    "secrets:sweep": "bash ./secrets-sweep.sh",
+    "firebase:inspect": "tsx ./src/firebase-inspect.ts",
+    "firebase:test": "tsx --test ./src/firebase-admin-client.test.ts",
+    "firebase:rules:test": "firebase emulators:exec --config ../firebase/firebase.json --only database --project demo-pu-transit \"tsx --test src/firebase-rules.test.ts\"",
+    "retention:cleanup": "tsx ./src/retention-cleanup.ts",
+    "retention:test": "firebase emulators:exec --config ../firebase/firebase.json --only database --project demo-pu-transit \"tsx --test src/retention.test.ts\"",
+    "demo": "tsx ./src/demo.ts",
+    "demo:children": "tsx ./src/demo-children.ts",
+    "demo:seed": "tsx ./src/demo-seed.ts",
+    "demo:check": "tsx ./src/demo-check.mts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "nat01:coverage": "tsx ./src/nat01-coverage.ts",
+    "nat01:test": "TZ=Asia/Kolkata tsx --test ./src/nat01-coverage.test.ts",
+    "nat05:parity": "tsx ./src/nat05-parity.ts",
+    "nat05:test": "TZ=Asia/Kolkata tsx --test ./src/nat05-parity.test.ts",
+    "nat06:auth": "tsx ./src/nat06-auth-parity.ts",
+    "buses:migrate": "tsx ./src/buses-migrate.ts",
+    "buses:test": "tsx --test ./src/buses-migrate-plan.test.ts"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "@types/node": "catalog:",
+    "@workspace/api-client-react": "workspace:*",
+    "firebase": "12.19.0",
+    "firebase-tools": "^15.30.0",
+    "tsx": "catalog:"
+  },
+  "dependencies": {
+    "firebase-admin": "14.4.0"
+  }
+}

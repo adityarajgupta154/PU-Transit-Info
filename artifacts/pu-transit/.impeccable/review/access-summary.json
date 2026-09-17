@@ -1,0 +1,266 @@
+{
+  "generatedAt": "2026-09-13T09:51:47.642Z",
+  "target": "https://f0f930a8-6c87-4e57-a43c-5a800b218d13-00-1vc67bn72zhlt.reed.replit.dev",
+  "note": "Visual-only CDP fixtures. Auth, Firebase, API requests, and writes are mocked/intercepted.",
+  "screenshots": [
+    {
+      "label": "student-selected-shuttle",
+      "desktop": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-student-selected-shuttle-desktop.png",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 1425,
+        "viewportWidth": 1425,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2370,
+            "clientWidth": 698
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2370,
+            "clientWidth": 0
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 768,
+            "clientWidth": 0
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2370,
+            "clientWidth": 0
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      },
+      "phone": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-student-selected-shuttle-phone.png",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2196,
+            "clientWidth": 350
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2370,
+            "clientWidth": 0
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 559,
+            "clientWidth": 420
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 559,
+            "clientWidth": 0
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 2370,
+            "clientWidth": 0
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      }
+    },
+    {
+      "label": "driver-idle-hi",
+      "desktop": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-driver-idle-hi-desktop.png",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 1425,
+        "viewportWidth": 1425,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          },
+          {
+            "tag": "h1",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 769,
+            "clientWidth": 487
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      },
+      "phone": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-driver-idle-hi-phone.png",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          },
+          {
+            "tag": "h1",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 513,
+            "clientWidth": 350
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      }
+    },
+    {
+      "label": "admin-users-request-root",
+      "desktop": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-admin-users-request-root-desktop.png",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 1425,
+        "viewportWidth": 1425,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      },
+      "phone": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-admin-users-request-root-phone.png",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          },
+          {
+            "tag": "nav",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 400,
+            "clientWidth": 390
+          },
+          {
+            "tag": "div",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 651,
+            "clientWidth": 350
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      }
+    },
+    {
+      "label": "about-phone",
+      "phone": {
+        "path": "artifacts/pu-transit/.impeccable/review/access-about-phone.png",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "horizontalOverflow": false,
+        "documentWidth": 390,
+        "viewportWidth": 390,
+        "overflowing": [
+          {
+            "tag": "a",
+            "id": null,
+            "testid": null,
+            "scrollWidth": 133,
+            "clientWidth": 1
+          }
+        ],
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "runtimeErrors": [],
+        "visibleAlerts": []
+      }
+    }
+  ],
+  "overflow": [],
+  "clientErrors": []
+}

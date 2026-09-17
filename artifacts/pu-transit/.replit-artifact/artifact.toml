@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "PU Transit"
+description = "A university bus tracking system for Parul University students, drivers, and transport administrators, with route maps, live location sharing, and route management."
+version = "1.0.0"
+id = "artifacts/pu-transit"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22930
+
+[services.development]
+run = "pnpm --filter @workspace/pu-transit run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/pu-transit", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/pu-transit/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22930"
+BASE_PATH = "/"

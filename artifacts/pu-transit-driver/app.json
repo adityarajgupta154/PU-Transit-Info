@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "PU Transit Driver",
+    "slug": "pu-transit-driver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "pu-transit-driver",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.putransit.driver",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "PU Transit Driver shows this bus’s position to Parul University students and staff during a trip you start. Sharing stops when you end the trip.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "PU Transit Driver shares this bus’s live position with Parul University students and staff during a trip you start, including with the screen off or the app in the background. Sharing stops when you end the trip.",
+        "UIBackgroundModes": [
+          "location"
+        ]
+      }
+    },
+    "android": {
+      "package": "com.putransit.driver",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "POST_NOTIFICATIONS",
+        "WAKE_LOCK"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "PU Transit Driver shares this bus’s live position with Parul University students and staff during a trip you start, including with the screen off or the app in the background. Sharing stops when you end the trip.",
+          "locationAlwaysPermission": "PU Transit Driver shares this bus’s live position with Parul University students and staff during a trip you start, including with the screen off or the app in the background. Sharing stops when you end the trip.",
+          "locationWhenInUsePermission": "PU Transit Driver shows this bus’s position to Parul University students and staff during a trip you start. Sharing stops when you end the trip.",
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true,
+          "isIosBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-task-manager"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

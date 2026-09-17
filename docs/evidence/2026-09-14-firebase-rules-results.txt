@@ -1,0 +1,45 @@
+DOC-03 — Firebase Security Rules emulator test results
+Date: 14 September 2026 (Asia/Kolkata); captured in this DOC-03 run
+First timestamp in runner output (UTC): 2026-09-14T10:18:53.226Z
+Node: v24.13.0; Firebase CLI 15.30.0; project: demo-pu-transit
+Command: pnpm --filter @workspace/scripts run firebase:rules:test
+Exit code: 0
+Scope: local Firebase Realtime Database emulator; mock identities, isolated demo project. No Rules publication or live database mutation.
+Format: test result lines and runner summary retained verbatim; expected permission_denied warnings and emulator lifecycle chatter omitted.
+Rules SHA-256 (both mirrors): ba8623026f413166390820b75fa6e57128b0de0300b09dcd59917a6fee720fbf
+Test source SHA-256: 9e671e9f62584a9cacf82b6acfac0b5991c816ef1d090f4ec3e7c11fc068c76d
+
+✔ anonymous, unverified, wrong-domain, pending, inactive, and suspended reads fail (848.899539ms)
+✔ verified university users self-create an approved student or staff record, optionally with a role request (166.175669ms)
+✔ personal-email users may only be students and lose access after the grace period (129.34937ms)
+✔ a member can sync the record email to a new verified university email and nothing else (72.719914ms)
+✔ a changed or unverified email cannot reuse an approved record; only a verified university email carries it over (AC-32) (116.846882ms)
+✔ an approved, active member past expiresAt is denied routes and tracking until an admin extends it (IDN-01) (140.2285ms)
+✔ only the root admin can change the root admin record (70.095217ms)
+✔ notices are admin-created, member-readable, never edited, and bounded (79.096995ms)
+✔ service calendar days are admin-written (re-writable), member-readable, keyed by a real date, and bounded (85.996052ms)
+✔ maintenance run records are admin-readable and written by no client (SEC-05: the job identity bypasses Rules) (64.920233ms)
+✔ buses are admin-written, member-readable, never deleted, and every bus reference must be registered (126.127707ms)
+✔ routes accept a kind of bus or shuttle only (38.283447ms)
+✔ routes need a status, and publishing needs a manual acknowledgement or ors geometry (RTE-01) (48.763182ms)
+✔ route versions are admin-created once, member-readable, never changed; drafts are admin-only (RTE-02) (107.800533ms)
+✔ approved students can read routes but cannot write them (37.329712ms)
+✔ legacy driverStatus is denied for every role (65.537717ms)
+✔ audit is admin-readable and create-only with strict actor and shape (82.173429ms)
+✔ an active approved admin can approve memberships and create, edit, and delete routes (78.24858ms)
+✔ assigned driver can preflight a missing node and complete start/sample/weak/heartbeat/end (216.75966ms)
+✔ route versions pinned at Start cannot change, grow, or vanish for the rest of the trip (AC-19) (179.480334ms)
+✔ tracking rejects unauthorized roles, ownership changes, malformed data, stale sequences, and old-client bypasses (218.289707ms)
+✔ admin force-end is narrowly limited to the exact active-to-ended transition (194.625769ms)
+✔ a stale owner can be replaced only by a new generation, and the old generation cannot publish (65.2738ms)
+✔ an absent bus can receive an ended tombstone and cannot reopen that generation (78.453051ms)
+✔ dated assignments are admin-written with a verified shape and readable by their driver or an admin (ASG-01) (115.691535ms)
+✔ a dated assignment admits Start on another bus for its day and keeps admitting the same trip (ASG-01) (186.521565ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5319.11675

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Console | UniTransit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div class="container" style="max-width: 600px; padding-top: 4rem;">
+
+        <div style="margin-bottom: 2rem;">
+            <a href="index.html" style="color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="glass-card fade-in">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="role-icon">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <h2>Driver Login</h2>
+                <p style="color: var(--text-muted);">Enter your Bus ID to start shift</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="busIdInput" style="display: block; margin-bottom: 0.5rem;">Bus Registration Number</label>
+                <input type="text" id="busIdInput" placeholder="e.g. UP-14-BZ-2024">
+            </div>
+
+            <button id="loginBtn" class="btn btn-primary" style="width: 100%;">Login</button>
+        </div>
+
+        <!-- Dashboard Section (Hidden) -->
+        <div id="dashboardSection" class="glass-card fade-in" style="display: none; text-align: center;">
+            <h2 style="margin-bottom: 0.5rem;">Bus Dashboard</h2>
+            <h3 id="displayBusId" style="color: var(--primary-color); margin-bottom: 2rem;">--</h3>
+
+            <div style="margin-bottom: 3rem;">
+                <p style="color: var(--text-muted); margin-bottom: 1rem;">Current Status</p>
+                <div id="statusIndicator" style="font-size: 1.5rem; font-weight: 600; color: var(--text-muted);">
+                    Offline
+                </div>
+            </div>
+
+            <button id="toggleTrackingBtn" class="btn btn-primary"
+                style="width: 100%; font-size: 1.25rem; padding: 1rem;">
+                <i class="fa-solid fa-play"></i> Start Tracking
+            </button>
+
+            <button id="logoutBtn" class="btn btn-secondary" style="margin-top: 2rem; width: 100%;">
+                Logout
+            </button>
+        </div>
+
+    </div>
+
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/driver.js"></script>
+</body>
+
+</html>
