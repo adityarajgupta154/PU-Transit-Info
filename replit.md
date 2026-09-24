@@ -2,6 +2,13 @@
 
 University bus tracking for students, drivers and transport administrators.
 
+## Running in this Replit workspace
+
+- Install with `pnpm install --frozen-lockfile`, then run `pnpm run typecheck:libs` to generate shared-library declarations.
+- Start the existing managed workflows `artifacts/api-server: API Server` and `artifacts/pu-transit: web`; the web preview is at `/` and the API health check is `/api/healthz`. The web app uses same-origin `/api` routing.
+- The shared development environment already supplies `FIREBASE_PROJECT_ID` and `FIREBASE_DATABASE_URL` for the existing live Firebase project. The web Firebase config is checked in. Do not set the demo flags on these workflows. Sign-in and data access still require a real Firebase account, approved membership, enabled Email/Password authentication, and published matching database Rules; see `docs/Firebase-Setup.md`.
+- `ORS_API_KEY` is not configured; map search and road directions require an owner-supplied server secret. The native driver Expo workflow is separate and is not needed for the web preview.
+
 ## Current owner amendment (13 Sep 2026)
 
 - The product continues as the web app **PU Transit**. Native driver tracking is later work. The owner reports that the official Play app is being discontinued; this is owner-reported, not independently verified here.
