@@ -46,7 +46,7 @@ Data lives in **Firebase Authentication** and the **Firebase Realtime Database (
 
 ### Highlights
 
-| | |
+| Highlight | In practice |
 |---|---|
 | **Live means live** | The bus marker is shown only for a running trip with a usable position. Riders see *live*, *delayed*, *weak GPS*, *GPS unavailable* or *offline*, worked out from **server** timestamps, so a phone with a wrong clock cannot fake a live bus. A delayed bus keeps its last known position; an offline, GPS-unavailable or ended bus leaves the map. |
 | **Real roads, real stops** | Road paths are plotted by OpenRouteService through the exact stop list the office entered, on a map locked to Vadodara. A hand-drawn path can be published only when the office ticks *manual path*, and riders then see "path not verified". |
